@@ -1,0 +1,6 @@
+@media (min-width: 768px) {
+    .main-view {
+        display: grid;
+        grid-template-columns: 1fr 6fr;
+    }
+}
