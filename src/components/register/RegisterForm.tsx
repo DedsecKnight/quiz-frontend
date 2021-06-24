@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { registerUser } from "../../graphql/query/auth";
+import { registerUser } from "../../graphql/mutation/auth";
 import { useMutation } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";

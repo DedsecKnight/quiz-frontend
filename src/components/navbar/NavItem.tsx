@@ -2,7 +2,7 @@ interface Props {
     active?: boolean;
     icon: React.SVGProps<SVGSVGElement>;
     title: string;
-    action?: () => void;
+    action: () => void;
 }
 
 const NavItem: React.FC<Props> = ({ icon, title, active, action }) => {

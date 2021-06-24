@@ -2,7 +2,11 @@ import { AUTH_KEY } from "../../constants";
 import NavItem from "./NavItem";
 import { useHistory } from "react-router";
 
-const NavBar = () => {
+interface Props {
+    active: string;
+}
+
+const NavBar: React.FC<Props> = ({ active }) => {
     const history = useHistory();
 
     const logout = () => {
@@ -27,14 +31,15 @@ const NavBar = () => {
             </div>
             <div className="w-full">
                 <NavItem
-                    active={true}
+                    action={() => history.push("/")}
+                    active={active === "/"}
                     icon={
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke="black"
+                            stroke={active === "/" ? "black" : "white"}
                         >
                             <path
                                 strokeLinecap="round"
@@ -48,13 +53,17 @@ const NavBar = () => {
                 />
 
                 <NavItem
+                    action={() => history.push("/create-quiz")}
+                    active={active === "/create-quiz"}
                     icon={
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke="white"
+                            stroke={
+                                active === "/create-quiz" ? "black" : "white"
+                            }
                         >
                             <path
                                 strokeLinecap="round"
@@ -67,13 +76,16 @@ const NavBar = () => {
                     title="Create Quiz"
                 />
                 <NavItem
+                    active={active === "/browse-quiz"}
                     icon={
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke="white"
+                            stroke={
+                                active === "/browse-quiz" ? "black" : "white"
+                            }
                         >
                             <path
                                 strokeLinecap="round"
@@ -84,15 +96,18 @@ const NavBar = () => {
                         </svg>
                     }
                     title="Browse Quiz"
+                    action={() => history.push("/browse-quiz")}
                 />
                 <NavItem
+                    action={() => history.push("/settings")}
+                    active={active === "/settings"}
                     icon={
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke="white"
+                            stroke={active === "/settings" ? "black" : "white"}
                         >
                             <path
                                 strokeLinecap="round"

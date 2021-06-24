@@ -4,16 +4,16 @@ import { AUTH_KEY } from "../constants";
 import { onError } from "@apollo/client/link/error";
 
 const httpLink = createHttpLink({
-    uri: "http://localhost:5000/graphql",
+    uri: "http://localhost:5000",
 });
 
 const errorLink = onError(({ networkError, graphQLErrors }) => {
     if (graphQLErrors) {
-        graphQLErrors.map(({ message }) =>
-            console.log(`[GraphQL error]: Message: ${message}`)
-        );
+        graphQLErrors.forEach((obj) => {
+            console.log(obj);
+        });
     }
-    if (networkError) console.log(`[Network error]: ${networkError}`);
+    if (networkError) console.log(networkError);
 });
 
 const authLink = setContext((_, { headers }) => {

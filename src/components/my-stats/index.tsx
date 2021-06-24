@@ -2,16 +2,29 @@ import Card from "./Card";
 import PerformanceChart from "./PerformanceChart";
 import Profile from "./Profile";
 
-import { client } from "../../graphql/client";
 import { getUserInfo } from "../../graphql/query/user";
 import { SubmissionObj } from "./interfaces";
+import { useQuery } from "@apollo/client";
+import { AUTH_KEY } from "../../constants";
 
 const MyStats: React.FC = () => {
-    const { mySubmissions } = client.readQuery({
-        query: getUserInfo,
+    const { error, data } = useQuery(getUserInfo, {
+        errorPolicy: "all",
     });
 
-    return (
+    if (error) {
+        if (
+            error.graphQLErrors.filter(
+                (obj) =>
+                    obj.extensions && obj.extensions.code === "UNAUTHENTICATED"
+            ).length !== 0
+        ) {
+            localStorage.removeItem(AUTH_KEY);
+        }
+        return <div>{error.graphQLErrors}</div>;
+    }
+
+    return data ? (
         <div className="my-7 flex flex-col-reverse items-center gap-y-7 lg:flex-row rounded-lg">
             <div className="flex flex-col justify-between w-full md:w-4/5 px-7 lg:border-r lg:w-7/12">
                 <div className="my-stat-header border-b-2 pb-5">
@@ -39,7 +52,7 @@ const MyStats: React.FC = () => {
                             </svg>
                         }
                         title="Total Score"
-                        data={mySubmissions.reduce(
+                        data={data.mySubmissions.reduce(
                             (acc: number, obj: SubmissionObj) =>
                                 acc + obj.score,
                             0
@@ -61,7 +74,7 @@ const MyStats: React.FC = () => {
                             </svg>
                         }
                         title="Highest Score"
-                        data={mySubmissions.reduce(
+                        data={data.mySubmissions.reduce(
                             (acc: number, obj: SubmissionObj) =>
                                 Math.max(acc, obj.score),
                             0
@@ -76,6 +89,8 @@ const MyStats: React.FC = () => {
                 <Profile />
             </div>
         </div>
+    ) : (
+        <div>Loading</div>
     );
 };
 
