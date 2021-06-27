@@ -27,7 +27,7 @@ const LoginForm: React.FC = () => {
             history.push("/");
         },
         onError: (error) => {
-            console.log(error.message);
+            console.log(error);
         },
     });
 
