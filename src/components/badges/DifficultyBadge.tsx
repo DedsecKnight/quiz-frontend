@@ -7,8 +7,8 @@ const DifficultyBadge: React.FC<Props> = ({ difficulty }) => {
         difficulty === "Hard"
             ? "bg-red-600"
             : difficulty === "Normal"
-            ? "bg-amber-500"
-            : "bg-emerald-500";
+            ? "bg-yellow-500"
+            : "bg-green-500";
     return (
         <div className={`mr-3 py-1 px-2 ${badgeColor} text-white rounded-lg`}>
             {difficulty}

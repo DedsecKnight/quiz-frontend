@@ -1,7 +1,7 @@
-import { client } from "../../graphql/client";
 import { getQuizzes } from "../../graphql/query/getQuizzes";
 import DifficultyBadge from "../badges/DifficultyBadge";
 import CategoryBadge from "../badges/CategoryBadge";
+import { useQuery } from "@apollo/client";
 
 interface QuizData {
     quizName: string;
@@ -17,9 +17,12 @@ interface QuizData {
 }
 
 const QuizList = () => {
-    const data = client.readQuery({
-        query: getQuizzes,
-    });
+    const { error, data } = useQuery(getQuizzes);
+
+    if (error) {
+        console.log(error.graphQLErrors);
+        return <div>Error occurred</div>;
+    }
 
     if (data)
         return (

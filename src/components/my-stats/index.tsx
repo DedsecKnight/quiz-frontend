@@ -6,11 +6,13 @@ import { getUserInfo } from "../../graphql/query/user";
 import { SubmissionObj } from "./interfaces";
 import { useQuery } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
+import { useHistory } from "react-router-dom";
 
 const MyStats: React.FC = () => {
     const { error, data } = useQuery(getUserInfo, {
         errorPolicy: "all",
     });
+    const history = useHistory();
 
     if (error) {
         if (
@@ -20,8 +22,15 @@ const MyStats: React.FC = () => {
             ).length !== 0
         ) {
             localStorage.removeItem(AUTH_KEY);
+            history.push("/login");
         }
-        return <div>{error.graphQLErrors}</div>;
+        return (
+            <div>
+                {error.graphQLErrors.map(({ message }, idx) => (
+                    <h1 key={idx}>{message}</h1>
+                ))}
+            </div>
+        );
     }
 
     return data ? (

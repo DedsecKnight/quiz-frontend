@@ -4,23 +4,9 @@ import Pagination from "./Pagination";
 import { useQuery } from "@apollo/client";
 import { getQuizzes } from "../../graphql/query/getQuizzes";
 import { AUTH_KEY } from "../../constants";
+import { injectClass } from "../utilities/inject-class";
 
 const BrowseQuiz = () => {
-    const injectClass = () => {
-        var getNavbar = document.querySelector(".navbar");
-        if (getNavbar?.classList.contains("hidden")) {
-            getNavbar?.classList.remove("hidden");
-            getNavbar?.classList.remove("md:block");
-
-            getNavbar?.classList.add("block");
-        } else {
-            getNavbar?.classList.add("hidden");
-            getNavbar?.classList.add("md:block");
-
-            getNavbar?.classList.remove("block");
-        }
-    };
-
     const { data, error } = useQuery(getQuizzes, {
         errorPolicy: "all",
     });
@@ -66,7 +52,7 @@ const BrowseQuiz = () => {
                                 Browse Quiz
                             </h1>
                             <p className="text-center lg:text-left text-indigo-400">
-                                Check out your performance in recent quizzes
+                                Let's solve some quizzes
                             </p>
                         </div>
                         <SearchBox />

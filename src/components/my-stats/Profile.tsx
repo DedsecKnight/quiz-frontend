@@ -3,23 +3,9 @@ import QuizCard from "./QuizCard";
 import { SubmissionObj, UserObj } from "./interfaces";
 import { client } from "../../graphql/client";
 import { getUserInfo } from "../../graphql/query/user";
+import { injectClass } from "../utilities/inject-class";
 
 const Profile = () => {
-    const injectClass = () => {
-        var getNavbar = document.querySelector(".navbar");
-        if (getNavbar?.classList.contains("hidden")) {
-            getNavbar?.classList.remove("hidden");
-            getNavbar?.classList.remove("md:block");
-
-            getNavbar?.classList.add("block");
-        } else {
-            getNavbar?.classList.add("hidden");
-            getNavbar?.classList.add("md:block");
-
-            getNavbar?.classList.remove("block");
-        }
-    };
-
     const { mySubmissions, myInfo, myQuizzes } = client.readQuery({
         query: getUserInfo,
     });
@@ -28,7 +14,7 @@ const Profile = () => {
         <div className="flex flex-col justify-between mb-6 md:mb-0">
             <div
                 className="block md:hidden cursor-pointer"
-                onClick={(e) => injectClass()}
+                onClick={() => injectClass()}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

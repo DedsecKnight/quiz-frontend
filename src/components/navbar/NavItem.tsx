@@ -21,7 +21,7 @@ const NavItem: React.FC<Props> = ({ icon, title, active, action }) => {
             >
                 {icon}
                 <span
-                    className={`w-full text-left ml-4 text-lg ${
+                    className={`w-full text-center md:text-left ml-4 text-lg ${
                         active ? "text-black" : "text-white"
                     }`}
                 >
