@@ -2,8 +2,10 @@ import { getQuizzes } from "../../graphql/query/getQuizzes";
 import DifficultyBadge from "../badges/DifficultyBadge";
 import CategoryBadge from "../badges/CategoryBadge";
 import { useQuery } from "@apollo/client";
+import { Link } from "react-router-dom";
 
 interface QuizData {
+    id: string;
     quizName: string;
     author: {
         name: string;
@@ -55,12 +57,12 @@ const QuizList = () => {
                                 categoryName={quiz.category.categoryName}
                             />
                         </div>
-                        <button
+                        <Link
                             className="border-blue-500 border py-2 px-4 rounded-xl text-blue-500 hover:bg-blue-400 hover:text-white hover:border-0 transition ease-in-out duration-300"
-                            type="button"
+                            to={`/start-quiz/${quiz.id}/ready`}
                         >
                             Click to begin
-                        </button>
+                        </Link>
                     </div>
                 ))}
             </div>

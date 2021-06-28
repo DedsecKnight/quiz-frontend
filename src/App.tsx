@@ -8,6 +8,8 @@ import MyStats from "./components/my-stats";
 import MainView from "./components/main-view";
 import CreateQuiz from "./components/create-quiz";
 import Settings from "./components/settings";
+import Countdown from "./components/start-quiz/Countdown";
+import StartQuiz from "./components/start-quiz";
 
 const App: React.FC = () => {
     return (
@@ -47,6 +49,25 @@ const App: React.FC = () => {
                 component={() => (
                     <MainView link="/settings">
                         <Settings />
+                    </MainView>
+                )}
+            />
+            <PrivateRoute
+                exact
+                path="/start-quiz/:id/ready"
+                component={() => (
+                    <MainView link="/start-quiz">
+                        <Countdown />
+                    </MainView>
+                )}
+            />
+
+            <PrivateRoute
+                exact
+                path="/start-quiz/:id"
+                component={() => (
+                    <MainView link="/start-quiz">
+                        <StartQuiz />
                     </MainView>
                 )}
             />

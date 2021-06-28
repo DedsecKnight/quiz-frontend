@@ -3,6 +3,7 @@ import { gql } from "@apollo/client";
 export const getQuizzes = gql`
     query GetQuizzes {
         quizzes {
+            id
             quizName
             author {
                 name
@@ -12,6 +13,21 @@ export const getQuizzes = gql`
             }
             category {
                 categoryName
+            }
+        }
+    }
+`;
+
+export const getQuizById = gql`
+    query GetQuizById($quizId: Float!) {
+        quizById(id: $quizId) {
+            quizName
+            questions {
+                question
+                answers {
+                    id
+                    answer
+                }
             }
         }
     }
