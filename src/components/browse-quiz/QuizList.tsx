@@ -2,7 +2,8 @@ import { getQuizzes } from "../../graphql/query/getQuizzes";
 import DifficultyBadge from "../badges/DifficultyBadge";
 import CategoryBadge from "../badges/CategoryBadge";
 import { useQuery } from "@apollo/client";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { checkError } from "../error/checkError";
 
 interface QuizData {
     id: string;
@@ -20,11 +21,9 @@ interface QuizData {
 
 const QuizList = () => {
     const { error, data } = useQuery(getQuizzes);
+    const history = useHistory();
 
-    if (error) {
-        console.log(error.graphQLErrors);
-        return <div>Error occurred</div>;
-    }
+    checkError(history, error);
 
     if (data)
         return (

@@ -3,6 +3,7 @@ import { loginUser } from "../../graphql/mutation/auth";
 import { useMutation } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
+import { checkError } from "../error/checkError";
 
 interface UserForm {
     email: string;
@@ -27,7 +28,12 @@ const LoginForm: React.FC = () => {
             history.push("/");
         },
         onError: (error) => {
-            console.log(error);
+            if (error.networkError) {
+                history.push("/500");
+            } else {
+                console.log(error);
+                checkError(history, error);
+            }
         },
     });
 

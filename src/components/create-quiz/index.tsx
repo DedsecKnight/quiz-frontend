@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { getUserInfo } from "../../graphql/query/user";
 import { injectClass } from "../utilities/inject-class";
 import { createQuiz } from "../../graphql/mutation/createQuiz";
+import { checkError } from "../error/checkError";
+import { useHistory } from "react-router-dom";
 
 interface AnswerObj {
     answer: string;
@@ -24,6 +26,9 @@ interface QuizForm {
 
 const CreateQuiz = () => {
     const { error, data } = useQuery(getUserInfo);
+    const history = useHistory();
+
+    checkError(history, error);
 
     const [currentPage, setCurrentPage] = useState(0);
     const [newQuiz, setNewQuiz] = useState<QuizForm>({
@@ -40,16 +45,17 @@ const CreateQuiz = () => {
         },
         onCompleted: (data) => {
             console.log(data);
+            history.push("/browse-quiz");
         },
         onError: (error) => {
             console.log(error);
+            checkError(history, error);
         },
     });
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         createNewQuiz();
-        console.log(newQuiz);
     };
 
     const updateQuizInfo = (e: React.ChangeEvent<any>) => {
@@ -127,8 +133,6 @@ const CreateQuiz = () => {
                 userId: data.myInfo.id,
             }));
     }, [data]);
-
-    if (error) return <div>Error</div>;
 
     if (data)
         return (

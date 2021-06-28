@@ -8,12 +8,7 @@ const httpLink = createHttpLink({
 });
 
 const errorLink = onError(({ networkError, graphQLErrors }) => {
-    if (graphQLErrors) {
-        graphQLErrors.forEach((obj) => {
-            console.log(obj);
-        });
-    }
-    if (networkError) console.log(networkError);
+    console.log("Error occurred");
 });
 
 const authLink = setContext((_, { headers }) => {

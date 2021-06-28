@@ -3,6 +3,7 @@ import { registerUser } from "../../graphql/mutation/auth";
 import { useMutation } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
+import { checkError } from "../error/checkError";
 
 interface UserForm {
     name: string;
@@ -33,6 +34,7 @@ const RegisterForm: React.FC = () => {
         },
         onError: (error) => {
             console.log(error.message);
+            checkError(history, error);
         },
     });
 

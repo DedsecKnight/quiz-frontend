@@ -10,6 +10,8 @@ import CreateQuiz from "./components/create-quiz";
 import Settings from "./components/settings";
 import Countdown from "./components/start-quiz/Countdown";
 import StartQuiz from "./components/start-quiz";
+import Error500 from "./components/error/Error500";
+import Error404 from "./components/error/Error404";
 
 const App: React.FC = () => {
     return (
@@ -71,6 +73,8 @@ const App: React.FC = () => {
                     </MainView>
                 )}
             />
+            <Route exact path="/500" component={Error500} />
+            <Route exact path="/404" component={Error404} />
         </Switch>
     );
 };

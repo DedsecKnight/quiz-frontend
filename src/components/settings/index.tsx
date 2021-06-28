@@ -2,6 +2,7 @@ import { gql, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { AUTH_KEY } from "../../constants";
+import { checkError } from "../error/checkError";
 import { injectClass } from "../utilities/inject-class";
 
 interface FormType {
@@ -23,6 +24,8 @@ const Settings = () => {
             }
         }
     `);
+
+    checkError(history, error);
 
     const [formData, setFormData] = useState<FormType>({
         name: "",

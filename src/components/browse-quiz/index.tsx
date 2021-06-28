@@ -3,24 +3,19 @@ import QuizList from "./QuizList";
 import Pagination from "./Pagination";
 import { useQuery } from "@apollo/client";
 import { getQuizzes } from "../../graphql/query/getQuizzes";
-import { AUTH_KEY } from "../../constants";
 import { injectClass } from "../utilities/inject-class";
+import { useHistory } from "react-router-dom";
+import { checkError } from "../error/checkError";
 
 const BrowseQuiz = () => {
     const { data, error } = useQuery(getQuizzes, {
         errorPolicy: "all",
     });
+    const history = useHistory();
 
     if (error) {
-        if (
-            error.graphQLErrors.filter(
-                (obj) =>
-                    obj.extensions && obj.extensions.code === "UNAUTHENTICATED"
-            ).length !== 0
-        ) {
-            localStorage.removeItem(AUTH_KEY);
-        }
-        return <div>{error.graphQLErrors}</div>;
+        checkError(history, error);
+        return <div></div>;
     }
 
     if (data)
@@ -28,7 +23,7 @@ const BrowseQuiz = () => {
             <>
                 <div
                     className="block md:hidden cursor-pointer p-4"
-                    onClick={(e) => injectClass()}
+                    onClick={() => injectClass()}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

@@ -5,8 +5,8 @@ import Profile from "./Profile";
 import { getUserInfo } from "../../graphql/query/user";
 import { SubmissionObj } from "./interfaces";
 import { useQuery } from "@apollo/client";
-import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
+import { checkError } from "../error/checkError";
 
 const MyStats: React.FC = () => {
     const { error, data } = useQuery(getUserInfo, {
@@ -15,22 +15,8 @@ const MyStats: React.FC = () => {
     const history = useHistory();
 
     if (error) {
-        if (
-            error.graphQLErrors.filter(
-                (obj) =>
-                    obj.extensions && obj.extensions.code === "UNAUTHENTICATED"
-            ).length !== 0
-        ) {
-            localStorage.removeItem(AUTH_KEY);
-            history.push("/login");
-        }
-        return (
-            <div>
-                {error.graphQLErrors.map(({ message }, idx) => (
-                    <h1 key={idx}>{message}</h1>
-                ))}
-            </div>
-        );
+        checkError(history, error);
+        return <div></div>;
     }
 
     return data ? (

@@ -2,10 +2,10 @@ import { useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { client } from "../../graphql/client";
 import { SubmitSolution } from "../../graphql/mutation/submit";
 import { getQuizById } from "../../graphql/query/getQuizzes";
 import { getUserInfo } from "../../graphql/query/user";
+import { checkError } from "../error/checkError";
 import AnswerBox from "./AnswerBox";
 
 interface MatchData {
@@ -19,47 +19,51 @@ interface SubmissionInput {
 }
 
 const StartQuiz = () => {
-    const match = useRouteMatch("/start-quiz/:id");
     const history = useHistory();
-    const userData = client.readQuery({
-        query: getUserInfo,
-    });
+
+    const match = useRouteMatch("/start-quiz/:id");
     const matchData: MatchData = match
         ? (match.params as MatchData)
         : {
               id: "0",
           };
-
     if (matchData.id === "0") {
         history.push("/browse-quiz");
     }
 
-    if (!userData || userData === null) history.push("/login");
+    const userData = useQuery(getUserInfo);
 
-    const { myInfo } = userData;
-
-    const [currentPage, setCurrentPage] = useState(0);
-    const [submission, setSubmission] = useState<SubmissionInput>({
-        userId: parseInt(myInfo.id) || -1,
-        quizId: parseInt(matchData.id),
-        answers: [],
-    });
-
-    const { loading, error, data } = useQuery(getQuizById, {
+    const quizData = useQuery(getQuizById, {
         variables: {
             quizId: parseInt(matchData.id),
         },
     });
 
+    const [currentPage, setCurrentPage] = useState(0);
+    const [submission, setSubmission] = useState<SubmissionInput>({
+        userId: -1,
+        quizId: parseInt(matchData.id),
+        answers: [],
+    });
+
     useEffect(() => {
-        if (data) {
-            let submissionInit = data.quizById.questions.map(() => -1);
+        if (quizData.data) {
+            let submissionInit = quizData.data.quizById.questions.map(() => -1);
             setSubmission((prev) => ({
                 ...prev,
                 answers: submissionInit,
             }));
         }
-    }, [data]);
+    }, [quizData.data]);
+
+    useEffect(() => {
+        if (userData.data) {
+            setSubmission((prev) => ({
+                ...prev,
+                userId: parseInt(userData.data.myInfo.id),
+            }));
+        }
+    }, [userData.data]);
 
     const [submitSolution] = useMutation(SubmitSolution, {
         variables: {
@@ -67,20 +71,28 @@ const StartQuiz = () => {
         },
         onCompleted: (data) => {
             console.log(data);
+            history.push("/");
         },
-        onError: (err) => {
-            console.log(err);
+        onError: (error) => {
+            console.log(error);
+            checkError(history, error);
         },
     });
 
-    if (error) {
-        console.log(error.graphQLErrors);
-        return <div>Error occurred</div>;
+    if (quizData.loading || userData.loading) return <div>Loading</div>;
+
+    checkError(history, userData.error);
+    if (quizData.error) {
+        checkError(history, quizData.error);
+        return <div></div>;
     }
 
-    if (loading) return <div>Loading</div>;
+    if (userData.error) {
+        checkError(history, userData.error);
+        return <div></div>;
+    }
 
-    const { quizById } = data;
+    const { quizById } = quizData.data;
 
     const updateOption = (id: string) => {
         let tempAns = [...submission.answers];
