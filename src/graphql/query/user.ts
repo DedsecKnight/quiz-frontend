@@ -16,10 +16,7 @@ export const getUserInfo = gql`
             name
         }
         myQuizzes {
-            quizName
-            category {
-                categoryName
-            }
+            id
         }
     }
 `;

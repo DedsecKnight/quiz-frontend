@@ -3,13 +3,13 @@ import PerformanceChart from "./PerformanceChart";
 import Profile from "./Profile";
 
 import { getUserInfo } from "../../graphql/query/user";
-import { SubmissionObj } from "./interfaces";
+import { QueryData, SubmissionObj } from "./interfaces";
 import { useQuery } from "@apollo/client";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
 
 const MyStats: React.FC = () => {
-    const { error, data } = useQuery(getUserInfo, {
+    const { error, data } = useQuery<QueryData>(getUserInfo, {
         errorPolicy: "all",
     });
     const history = useHistory();

@@ -4,31 +4,21 @@ import CategoryBadge from "../badges/CategoryBadge";
 import { useQuery } from "@apollo/client";
 import { Link, useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
-
-interface QuizData {
-    id: string;
-    quizName: string;
-    author: {
-        name: string;
-    };
-    difficulty: {
-        type: string;
-    };
-    category: {
-        categoryName: string;
-    };
-}
+import { QuizData } from "./interfaces";
 
 const QuizList = () => {
-    const { error, data } = useQuery(getQuizzes);
+    const { error, data } = useQuery<QuizData>(getQuizzes);
     const history = useHistory();
 
-    checkError(history, error);
+    if (error) {
+        checkError(history, error);
+        return <div></div>;
+    }
 
     if (data)
         return (
             <div className="my-6">
-                {data.quizzes.map((quiz: QuizData, idx: number) => (
+                {data.quizzes.map((quiz, idx: number) => (
                     <div
                         key={idx}
                         className="flex flex-row items-center justify-between p-4 my-2 border-2 border-gray-200 rounded-lg"

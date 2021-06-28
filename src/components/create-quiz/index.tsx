@@ -5,30 +5,11 @@ import { injectClass } from "../utilities/inject-class";
 import { createQuiz } from "../../graphql/mutation/createQuiz";
 import { checkError } from "../error/checkError";
 import { useHistory } from "react-router-dom";
-
-interface AnswerObj {
-    answer: string;
-    isCorrect: boolean;
-}
-
-interface QuestionObj {
-    question: string;
-    answers: AnswerObj[];
-}
-
-interface QuizForm {
-    userId: number;
-    quizName: string;
-    difficulty: string;
-    category: string;
-    questions: QuestionObj[];
-}
+import { QuizForm, QuestionObj } from "./interfaces";
 
 const CreateQuiz = () => {
     const { error, data } = useQuery(getUserInfo);
     const history = useHistory();
-
-    checkError(history, error);
 
     const [currentPage, setCurrentPage] = useState(0);
     const [newQuiz, setNewQuiz] = useState<QuizForm>({
@@ -39,12 +20,15 @@ const CreateQuiz = () => {
         questions: [],
     });
 
-    const [createNewQuiz] = useMutation(createQuiz, {
+    const [createNewQuiz] = useMutation<
+        { createQuiz: { id: number } },
+        { quizObj: QuizForm }
+    >(createQuiz, {
         variables: {
             quizObj: newQuiz,
         },
-        onCompleted: (data) => {
-            console.log(data);
+        onCompleted: ({ createQuiz }) => {
+            console.log(createQuiz);
             history.push("/browse-quiz");
         },
         onError: (error) => {
@@ -133,6 +117,11 @@ const CreateQuiz = () => {
                 userId: data.myInfo.id,
             }));
     }, [data]);
+
+    if (error) {
+        checkError(history, error);
+        return <div></div>;
+    }
 
     if (data)
         return (

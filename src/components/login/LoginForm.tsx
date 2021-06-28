@@ -4,6 +4,7 @@ import { useMutation } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
+import { AuthResponse } from "./interfaces";
 
 interface UserForm {
     email: string;
@@ -17,7 +18,15 @@ const LoginForm: React.FC = () => {
         password: "",
     });
 
-    const [login] = useMutation(loginUser, {
+    const [login] = useMutation<
+        {
+            login: AuthResponse;
+        },
+        {
+            email: string;
+            password: string;
+        }
+    >(loginUser, {
         variables: {
             email: form.email,
             password: form.password,

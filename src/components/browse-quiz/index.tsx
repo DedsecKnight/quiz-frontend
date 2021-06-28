@@ -6,10 +6,12 @@ import { getQuizzes } from "../../graphql/query/getQuizzes";
 import { injectClass } from "../utilities/inject-class";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
+import { QuizData } from "./interfaces";
 
 const BrowseQuiz = () => {
-    const { data, error } = useQuery(getQuizzes, {
+    const { data, error } = useQuery<QuizData>(getQuizzes, {
         errorPolicy: "all",
+        pollInterval: 1000,
     });
     const history = useHistory();
 

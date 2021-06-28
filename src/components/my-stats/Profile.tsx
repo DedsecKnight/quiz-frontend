@@ -1,14 +1,28 @@
 import StatCard from "./StatCard";
 import QuizCard from "./QuizCard";
-import { SubmissionObj, UserObj } from "./interfaces";
-import { client } from "../../graphql/client";
+import { SubmissionObj, UserObj, QueryData } from "./interfaces";
 import { getUserInfo } from "../../graphql/query/user";
 import { injectClass } from "../utilities/inject-class";
+import { useQuery } from "@apollo/client";
+import { checkError } from "../error/checkError";
+import { useHistory } from "react-router-dom";
+import { logout } from "../utilities/logout";
 
 const Profile = () => {
-    const { mySubmissions, myInfo, myQuizzes } = client.readQuery({
-        query: getUserInfo,
-    });
+    const history = useHistory();
+
+    const { data, error } = useQuery<QueryData>(getUserInfo);
+    if (error) {
+        checkError(history, error);
+        return <div></div>;
+    }
+
+    if (!data) {
+        logout(history);
+        return <div></div>;
+    }
+
+    const { mySubmissions, myInfo, myQuizzes } = data;
 
     return (
         <div className="flex flex-col justify-between mb-6 md:mb-0">

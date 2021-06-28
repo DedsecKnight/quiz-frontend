@@ -7,6 +7,7 @@ import { getQuizById } from "../../graphql/query/getQuizzes";
 import { getUserInfo } from "../../graphql/query/user";
 import { checkError } from "../error/checkError";
 import AnswerBox from "./AnswerBox";
+import { QuizData, UserData } from "./interfaces";
 
 interface MatchData {
     id: string;
@@ -31,13 +32,16 @@ const StartQuiz = () => {
         history.push("/browse-quiz");
     }
 
-    const userData = useQuery(getUserInfo);
+    const userData = useQuery<UserData>(getUserInfo);
 
-    const quizData = useQuery(getQuizById, {
-        variables: {
-            quizId: parseInt(matchData.id),
-        },
-    });
+    const quizData = useQuery<{ quizById: QuizData }, { quizId: number }>(
+        getQuizById,
+        {
+            variables: {
+                quizId: parseInt(matchData.id),
+            },
+        }
+    );
 
     const [currentPage, setCurrentPage] = useState(0);
     const [submission, setSubmission] = useState<SubmissionInput>({
@@ -60,12 +64,15 @@ const StartQuiz = () => {
         if (userData.data) {
             setSubmission((prev) => ({
                 ...prev,
-                userId: parseInt(userData.data.myInfo.id),
+                userId: parseInt(userData.data!.myInfo.id),
             }));
         }
     }, [userData.data]);
 
-    const [submitSolution] = useMutation(SubmitSolution, {
+    const [submitSolution] = useMutation<
+        { submit: { score: number } },
+        { submitInput: SubmissionInput }
+    >(SubmitSolution, {
         variables: {
             submitInput: submission,
         },
@@ -81,14 +88,18 @@ const StartQuiz = () => {
 
     if (quizData.loading || userData.loading) return <div>Loading</div>;
 
-    checkError(history, userData.error);
+    if (userData.error) {
+        checkError(history, userData.error);
+        return <div></div>;
+    }
+
     if (quizData.error) {
         checkError(history, quizData.error);
         return <div></div>;
     }
 
-    if (userData.error) {
-        checkError(history, userData.error);
+    if (!quizData.data) {
+        history.push("/browse-quiz");
         return <div></div>;
     }
 

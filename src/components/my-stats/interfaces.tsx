@@ -12,3 +12,11 @@ export interface UserObj {
     id: number;
     name: string;
 }
+
+export interface QueryData {
+    mySubmissions: SubmissionObj[];
+    myInfo: UserObj;
+    myQuizzes: Array<{
+        id: number;
+    }>;
+}

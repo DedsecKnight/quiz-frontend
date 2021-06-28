@@ -1,7 +1,7 @@
-import { AUTH_KEY } from "../../constants";
 import NavItem from "./NavItem";
 import { useHistory } from "react-router";
 import { injectClass } from "../utilities/inject-class";
+import { logout } from "../utilities/logout";
 
 interface Props {
     active: string;
@@ -9,11 +9,6 @@ interface Props {
 
 const NavBar: React.FC<Props> = ({ active }) => {
     const history = useHistory();
-
-    const logout = () => {
-        localStorage.removeItem(AUTH_KEY);
-        history.push("/login");
-    };
 
     return (
         <div className="bg-blue-900 flex flex-col items-center justify-between h-screen sticky top-0">
@@ -154,7 +149,9 @@ const NavBar: React.FC<Props> = ({ active }) => {
                         </svg>
                     }
                     title="Logout"
-                    action={logout}
+                    action={() => {
+                        logout(history);
+                    }}
                 />
             </div>
         </div>

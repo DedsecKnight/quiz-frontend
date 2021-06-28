@@ -1,16 +1,27 @@
+import { useQuery } from "@apollo/client";
 import { Bar } from "react-chartjs-2";
-import { client } from "../../graphql/client";
+import { useHistory } from "react-router-dom";
 import { getUserInfo } from "../../graphql/query/user";
+import { checkError } from "../error/checkError";
+import { logout } from "../utilities/logout";
 
-import { SubmissionObj } from "./interfaces";
+import { QueryData, SubmissionObj } from "./interfaces";
 
 const PerformanceChart = () => {
-    const { mySubmissions } = client.readQuery({
-        query: getUserInfo,
-        variables: {
-            userId: 1,
-        },
-    });
+    const history = useHistory();
+    const userData = useQuery<QueryData>(getUserInfo);
+
+    if (userData.error) {
+        checkError(history, userData.error);
+        return <div></div>;
+    }
+
+    if (!userData.data) {
+        logout(history);
+        return <div></div>;
+    }
+
+    const { mySubmissions } = userData.data;
 
     let startIndex = Math.max(0, mySubmissions.length - 6);
     let endIndex = Math.min(startIndex + 6, mySubmissions.length);
