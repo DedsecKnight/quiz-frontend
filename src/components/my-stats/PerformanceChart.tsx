@@ -12,16 +12,23 @@ const PerformanceChart = () => {
         },
     });
 
+    let startIndex = Math.max(0, mySubmissions.length - 6);
+    let endIndex = Math.min(startIndex + 6, mySubmissions.length);
+
+    const recentSubmission = mySubmissions.slice(startIndex, endIndex);
+
     const data = {
-        labels: mySubmissions.map((obj: SubmissionObj) => obj.quiz.quizName),
+        labels: recentSubmission.map((obj: SubmissionObj) => obj.quiz.quizName),
         datasets: [
             {
                 label: "Scores",
-                data: mySubmissions.map((obj: SubmissionObj) => obj.score),
-                backgroundColor: mySubmissions.map(
+                data: recentSubmission.map((obj: SubmissionObj) => obj.score),
+                backgroundColor: recentSubmission.map(
                     () => "rgba(54, 162, 235, 0.2)"
                 ),
-                borderColor: mySubmissions.map(() => "rgba(54, 162, 235, 1)"),
+                borderColor: recentSubmission.map(
+                    () => "rgba(54, 162, 235, 1)"
+                ),
                 borderWidth: 1,
             },
         ],

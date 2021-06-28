@@ -107,7 +107,10 @@ const Profile = () => {
                                 score={obj.score}
                             />
                         ))
-                        .splice(0, 3)
+                        .slice(
+                            Math.max(mySubmissions.length - 3, 0),
+                            Math.max(mySubmissions.length - 3, 0) + 3
+                        )
                 ) : (
                     <h1 className="text-center p-6">
                         You haven't taken any quizzes
