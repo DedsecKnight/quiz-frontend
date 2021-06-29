@@ -2,7 +2,6 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { SubmitSolution } from "../../graphql/mutation/submit";
 import { checkError } from "../error/checkError";
 import AnswerBox from "./AnswerBox";
 
@@ -30,6 +29,14 @@ const GET_QUIZ_AND_USER_DATA = gql`
         }
         myInfo {
             id
+        }
+    }
+`;
+
+const SUBMIT_SOLUTION = gql`
+    mutation SubmitSolution($submitInput: SubmitInput!) {
+        submit(submitInput: $submitInput) {
+            score
         }
     }
 `;
@@ -94,7 +101,7 @@ const StartQuiz = () => {
     const [submitSolution] = useMutation<
         { submit: { score: number } },
         { submitInput: SubmissionInput }
-    >(SubmitSolution, {
+    >(SUBMIT_SOLUTION, {
         variables: {
             submitInput: submission,
         },

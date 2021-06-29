@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { registerUser } from "../../graphql/mutation/auth";
-import { useMutation } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
@@ -12,6 +11,14 @@ interface UserForm {
     password: string;
     confirmPassword: string;
 }
+
+const REGISTER_USER = gql`
+    mutation RegisterUser($name: String!, $email: String!, $password: String!) {
+        registerUser(email: $email, password: $password, name: $name) {
+            token
+        }
+    }
+`;
 
 const RegisterForm: React.FC = () => {
     const history = useHistory();
@@ -31,7 +38,7 @@ const RegisterForm: React.FC = () => {
             email: string;
             password: string;
         }
-    >(registerUser, {
+    >(REGISTER_USER, {
         variables: {
             name: form.name,
             email: form.email,

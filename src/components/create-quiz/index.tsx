@@ -1,14 +1,40 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { getUserInfo } from "../../graphql/query/user";
 import { injectClass } from "../utilities/inject-class";
-import { createQuiz } from "../../graphql/mutation/createQuiz";
 import { checkError } from "../error/checkError";
 import { useHistory } from "react-router-dom";
 import { QuizForm, QuestionObj } from "./interfaces";
 
+const CREATE_QUIZ = gql`
+    mutation CreateQuiz($quizObj: QuizArgs!) {
+        createQuiz(quiz: $quizObj) {
+            id
+        }
+    }
+`;
+
+const GET_USER_ID = gql`
+    query GetUserID {
+        myInfo {
+            id
+        }
+    }
+`;
+
+interface QueryData {
+    myInfo: {
+        id: number;
+    };
+}
+
+interface MutationData {
+    createQuiz: {
+        id: number;
+    };
+}
+
 const CreateQuiz = () => {
-    const { loading, error, data } = useQuery(getUserInfo);
+    const { loading, error, data } = useQuery<QueryData>(GET_USER_ID);
     const history = useHistory();
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -20,22 +46,22 @@ const CreateQuiz = () => {
         questions: [],
     });
 
-    const [createNewQuiz] = useMutation<
-        { createQuiz: { id: number } },
-        { quizObj: QuizForm }
-    >(createQuiz, {
-        variables: {
-            quizObj: newQuiz,
-        },
-        onCompleted: ({ createQuiz }) => {
-            console.log(createQuiz);
-            history.push("/browse-quiz");
-        },
-        onError: (error) => {
-            console.log(error);
-            checkError(history, error);
-        },
-    });
+    const [createNewQuiz] = useMutation<MutationData, { quizObj: QuizForm }>(
+        CREATE_QUIZ,
+        {
+            variables: {
+                quizObj: newQuiz,
+            },
+            onCompleted: ({ createQuiz }) => {
+                console.log(createQuiz);
+                history.push("/browse-quiz");
+            },
+            onError: (error) => {
+                console.log(error);
+                checkError(history, error);
+            },
+        }
+    );
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

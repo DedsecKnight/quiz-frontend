@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { loginUser } from "../../graphql/mutation/auth";
-import { useMutation } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
@@ -10,6 +9,14 @@ interface UserForm {
     email: string;
     password: string;
 }
+
+const LOGIN_USER = gql`
+    mutation LoginUser($email: String!, $password: String!) {
+        login(email: $email, password: $password) {
+            token
+        }
+    }
+`;
 
 const LoginForm: React.FC = () => {
     const history = useHistory();
@@ -26,7 +33,7 @@ const LoginForm: React.FC = () => {
             email: string;
             password: string;
         }
-    >(loginUser, {
+    >(LOGIN_USER, {
         variables: {
             email: form.email,
             password: form.password,
