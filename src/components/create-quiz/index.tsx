@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import { QuizForm, QuestionObj } from "./interfaces";
 
 const CreateQuiz = () => {
-    const { error, data } = useQuery(getUserInfo);
+    const { loading, error, data } = useQuery(getUserInfo);
     const history = useHistory();
 
     const [currentPage, setCurrentPage] = useState(0);
@@ -117,6 +117,8 @@ const CreateQuiz = () => {
                 userId: data.myInfo.id,
             }));
     }, [data]);
+
+    if (loading) return <div>Loading...</div>;
 
     if (error) {
         checkError(history, error);
@@ -358,7 +360,7 @@ const CreateQuiz = () => {
             </>
         );
 
-    return <div>Loading</div>;
+    return <div>No Data Found</div>;
 };
 
 export default CreateQuiz;
