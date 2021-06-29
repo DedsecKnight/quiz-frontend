@@ -1,15 +1,32 @@
 import SearchBox from "./SearchBox";
 import QuizList from "./QuizList";
 import Pagination from "./Pagination";
-import { useQuery } from "@apollo/client";
-import { getQuizzes } from "../../graphql/query/getQuizzes";
+import { gql, useQuery } from "@apollo/client";
 import { injectClass } from "../utilities/inject-class";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
-import { QuizData } from "./interfaces";
+import { useState } from "react";
+
+export const ITEM_PER_PAGE = 5;
+
+const GET_QUIZ_COUNT = gql`
+    query GetQuizCount {
+        countAllQuizzes {
+            count
+        }
+    }
+`;
+
+interface QueryData {
+    countAllQuizzes: {
+        count: number;
+    };
+}
 
 const BrowseQuiz = () => {
-    const { loading, data, error } = useQuery<QuizData>(getQuizzes, {
+    const [currentPage, setCurrentPage] = useState(0);
+
+    const { loading, data, error } = useQuery<QueryData>(GET_QUIZ_COUNT, {
         errorPolicy: "all",
         pollInterval: 1000,
     });
@@ -19,6 +36,10 @@ const BrowseQuiz = () => {
     if (error) {
         checkError(history, error);
         return <div></div>;
+    }
+
+    if (!data) {
+        return <div>Data not found</div>;
     }
 
     return (
@@ -53,9 +74,15 @@ const BrowseQuiz = () => {
                         </p>
                     </div>
                     <SearchBox />
-                    <QuizList />
+                    <QuizList currentPage={currentPage} />
                     <Pagination
-                        numPages={Math.ceil(data ? data.quizzes.length / 5 : 0)}
+                        numPages={Math.ceil(
+                            data.countAllQuizzes.count / ITEM_PER_PAGE
+                        )}
+                        currentPage={currentPage}
+                        updatePage={(pageNumber) => {
+                            setCurrentPage(pageNumber);
+                        }}
                     />
                 </div>
             </div>
