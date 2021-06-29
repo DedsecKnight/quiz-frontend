@@ -2,24 +2,46 @@ import Card from "./Card";
 import PerformanceChart from "./PerformanceChart";
 import Profile from "./Profile";
 
-import { getUserInfo } from "../../graphql/query/user";
-import { QueryData, SubmissionObj } from "./interfaces";
-import { useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
 
+const GET_SCORE = gql`
+    query GetUserScore {
+        myScore {
+            maxScore
+            totalScore
+        }
+    }
+`;
+
+interface QueryData {
+    myScore: {
+        maxScore: number;
+        totalScore: number;
+    };
+}
+
 const MyStats: React.FC = () => {
-    const { error, data } = useQuery<QueryData>(getUserInfo, {
+    const { loading, error, data } = useQuery<QueryData>(GET_SCORE, {
         errorPolicy: "all",
     });
+
     const history = useHistory();
 
+    if (loading) return <div>Loading</div>;
     if (error) {
         checkError(history, error);
         return <div></div>;
     }
 
-    return data ? (
+    if (!data) {
+        return <div>No data found</div>;
+    }
+
+    const { myScore } = data;
+
+    return (
         <div className="my-7 flex flex-col-reverse items-center gap-y-7 lg:flex-row rounded-lg">
             <div className="flex flex-col justify-between w-full md:w-4/5 px-7 lg:border-r lg:w-7/12">
                 <div className="my-stat-header border-b-2 pb-5">
@@ -47,11 +69,7 @@ const MyStats: React.FC = () => {
                             </svg>
                         }
                         title="Total Score"
-                        data={data.mySubmissions.reduce(
-                            (acc: number, obj: SubmissionObj) =>
-                                acc + obj.score,
-                            0
-                        )}
+                        data={myScore.totalScore}
                     />
                     <Card
                         icon={
@@ -69,11 +87,7 @@ const MyStats: React.FC = () => {
                             </svg>
                         }
                         title="Highest Score"
-                        data={data.mySubmissions.reduce(
-                            (acc: number, obj: SubmissionObj) =>
-                                Math.max(acc, obj.score),
-                            0
-                        )}
+                        data={myScore.maxScore}
                     />
                 </div>
                 <div className="my-6 rounded-xl mx-auto p-8 w-full shadow-lg border-2">
@@ -84,8 +98,6 @@ const MyStats: React.FC = () => {
                 <Profile />
             </div>
         </div>
-    ) : (
-        <div>Loading</div>
     );
 };
 

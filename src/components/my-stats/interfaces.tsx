@@ -14,7 +14,7 @@ export interface UserObj {
 }
 
 export interface QueryData {
-    mySubmissions: SubmissionObj[];
+    myRecentSubmissionsLimit: SubmissionObj[];
     myInfo: UserObj;
     myQuizzes: Array<{
         id: number;

@@ -1,28 +1,86 @@
 import StatCard from "./StatCard";
 import QuizCard from "./QuizCard";
-import { SubmissionObj, UserObj, QueryData } from "./interfaces";
-import { getUserInfo } from "../../graphql/query/user";
 import { injectClass } from "../utilities/inject-class";
-import { useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { checkError } from "../error/checkError";
 import { useHistory } from "react-router-dom";
-import { logout } from "../utilities/logout";
+
+const GET_USER_INFO = gql`
+    query GetUserInfo($recentSubmissionLimit: Float!) {
+        myInfo {
+            name
+        }
+        countMySubmissions {
+            count
+        }
+        countMyQuizzes {
+            count
+        }
+        myRecentSubmissionsLimit(limit: $recentSubmissionLimit) {
+            score
+            quiz {
+                quizName
+                difficulty {
+                    type
+                }
+            }
+        }
+    }
+`;
+
+interface QueryData {
+    myInfo: {
+        name: string;
+    };
+    countMySubmissions: {
+        count: number;
+    };
+    countMyQuizzes: {
+        count: number;
+    };
+    myRecentSubmissionsLimit: Array<{
+        score: number;
+        quiz: {
+            quizName: string;
+            difficulty: {
+                type: string;
+            };
+        };
+    }>;
+}
 
 const Profile = () => {
     const history = useHistory();
 
-    const { data, error } = useQuery<QueryData>(getUserInfo);
+    const { loading, data, error } = useQuery<
+        QueryData,
+        {
+            recentSubmissionLimit: number;
+        }
+    >(GET_USER_INFO, {
+        variables: {
+            recentSubmissionLimit: 3,
+        },
+    });
+
+    if (loading) return <div>Loading</div>;
+
     if (error) {
         checkError(history, error);
         return <div></div>;
     }
 
     if (!data) {
-        logout(history);
-        return <div></div>;
+        console.log("Profile did not receive data");
+        return <div>No data found</div>;
     }
 
-    const { mySubmissions, myInfo, myQuizzes } = data;
+    const {
+        countMyQuizzes,
+        myRecentSubmissionsLimit,
+        myInfo,
+        countMySubmissions,
+    } = data;
 
     return (
         <div className="flex flex-col justify-between mb-6 md:mb-0">
@@ -55,10 +113,10 @@ const Profile = () => {
                 </div>
                 <div className="mt-5">
                     <h1 className="text-3xl font-medium text-blue-900 text-center">
-                        {(myInfo as UserObj).name}
+                        {myInfo.name}
                     </h1>
                     <p className="text-lg text-center text-indigo-400 mt-2">
-                        @{(myInfo as UserObj).name}
+                        @{myInfo.name}
                     </p>
                 </div>
             </div>
@@ -81,7 +139,7 @@ const Profile = () => {
                         </svg>
                     }
                     title="Quiz written"
-                    data={myQuizzes.length}
+                    data={countMyQuizzes.count}
                 />
                 <StatCard
                     icon={
@@ -101,7 +159,7 @@ const Profile = () => {
                         </svg>
                     }
                     title="Quiz submissions"
-                    data={mySubmissions.length}
+                    data={countMySubmissions.count}
                 />
             </div>
             <div className="flex flex-col mt-6 gap-y-4">
@@ -111,20 +169,15 @@ const Profile = () => {
                         View all my taken quizzes
                     </p>
                 </div>
-                {mySubmissions.length > 0 ? (
-                    mySubmissions
-                        .map((obj: SubmissionObj, idx: number) => (
-                            <QuizCard
-                                key={idx}
-                                difficulty={obj.quiz.difficulty.type}
-                                name={obj.quiz.quizName}
-                                score={obj.score}
-                            />
-                        ))
-                        .slice(
-                            Math.max(mySubmissions.length - 3, 0),
-                            Math.max(mySubmissions.length - 3, 0) + 3
-                        )
+                {myRecentSubmissionsLimit.length > 0 ? (
+                    myRecentSubmissionsLimit.map((obj, idx: number) => (
+                        <QuizCard
+                            key={idx}
+                            difficulty={obj.quiz.difficulty.type}
+                            name={obj.quiz.quizName}
+                            score={obj.score}
+                        />
+                    ))
                 ) : (
                     <h1 className="text-center p-6">
                         You haven't taken any quizzes

@@ -1,43 +1,69 @@
-import { useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { Bar } from "react-chartjs-2";
 import { useHistory } from "react-router-dom";
-import { getUserInfo } from "../../graphql/query/user";
 import { checkError } from "../error/checkError";
-import { logout } from "../utilities/logout";
 
-import { QueryData, SubmissionObj } from "./interfaces";
+const GET_RECENT_SUBMISSSION = gql`
+    query GetRecentSubmission($limit: Float!) {
+        myRecentSubmissionsLimit(limit: $limit) {
+            score
+            quiz {
+                quizName
+            }
+        }
+    }
+`;
+
+interface QueryData {
+    myRecentSubmissionsLimit: Array<{
+        score: number;
+        quiz: {
+            quizName: number;
+        };
+    }>;
+}
 
 const PerformanceChart = () => {
     const history = useHistory();
-    const userData = useQuery<QueryData>(getUserInfo);
+    const { loading, error, data } = useQuery<
+        QueryData,
+        {
+            limit: number;
+        }
+    >(GET_RECENT_SUBMISSSION, {
+        variables: {
+            limit: 6,
+        },
+    });
 
-    if (userData.error) {
-        checkError(history, userData.error);
+    if (loading) return <div>Loading user data...</div>;
+
+    if (error) {
+        checkError(history, error);
         return <div></div>;
     }
 
-    if (!userData.data) {
-        logout(history);
-        return <div></div>;
+    if (!data) {
+        return (
+            <div>
+                Oops, we cannot fetch any data at the moment. Please try again
+                later
+            </div>
+        );
     }
 
-    const { mySubmissions } = userData.data;
+    const { myRecentSubmissionsLimit } = data;
 
-    let startIndex = Math.max(0, mySubmissions.length - 6);
-    let endIndex = Math.min(startIndex + 6, mySubmissions.length);
-
-    const recentSubmission = mySubmissions.slice(startIndex, endIndex);
-
-    const data = {
-        labels: recentSubmission.map((obj: SubmissionObj) => obj.quiz.quizName),
+    const graphData = {
+        labels: myRecentSubmissionsLimit.map((obj) => obj.quiz.quizName),
         datasets: [
             {
                 label: "Scores",
-                data: recentSubmission.map((obj: SubmissionObj) => obj.score),
-                backgroundColor: recentSubmission.map(
+                data: myRecentSubmissionsLimit.map((obj) => obj.score),
+                backgroundColor: myRecentSubmissionsLimit.map(
                     () => "rgba(54, 162, 235, 0.2)"
                 ),
-                borderColor: recentSubmission.map(
+                borderColor: myRecentSubmissionsLimit.map(
                     () => "rgba(54, 162, 235, 1)"
                 ),
                 borderWidth: 1,
@@ -62,7 +88,7 @@ const PerformanceChart = () => {
             <div className="header">
                 <h1 className="title">Your Recent Submissions</h1>
             </div>
-            <Bar type="bar" data={data} options={options} />
+            <Bar type="bar" data={graphData} options={options} />
         </>
     );
 };
