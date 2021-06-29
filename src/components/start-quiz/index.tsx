@@ -1,16 +1,13 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { SubmitSolution } from "../../graphql/mutation/submit";
-import { getQuizById } from "../../graphql/query/getQuizzes";
-import { getUserInfo } from "../../graphql/query/user";
 import { checkError } from "../error/checkError";
 import AnswerBox from "./AnswerBox";
-import { QuizData, UserData } from "./interfaces";
 
 interface MatchData {
-    id: string;
+    id: number;
 }
 
 interface SubmissionInput {
@@ -19,55 +16,80 @@ interface SubmissionInput {
     answers: number[];
 }
 
+const GET_QUIZ_AND_USER_DATA = gql`
+    query GetQuizUserData($quizId: Float!) {
+        quizById(id: $quizId) {
+            quizName
+            questions {
+                question
+                answers {
+                    id
+                    answer
+                }
+            }
+        }
+        myInfo {
+            id
+        }
+    }
+`;
+
+interface QueryData {
+    quizById: {
+        quizName: string;
+        questions: Array<{
+            question: string;
+            answers: Array<{
+                id: string;
+                answer: string;
+            }>;
+        }>;
+    };
+    myInfo: {
+        id: string;
+    };
+}
+
 const StartQuiz = () => {
     const history = useHistory();
 
     const match = useRouteMatch("/start-quiz/:id");
-    const matchData: MatchData = match
-        ? (match.params as MatchData)
-        : {
-              id: "0",
-          };
-    if (matchData.id === "0") {
+    const matchData: MatchData = {
+        id: match ? parseInt((match.params as { id: string }).id) : 0,
+    };
+
+    if (matchData.id === 0) {
         history.push("/browse-quiz");
     }
 
-    const userData = useQuery<UserData>(getUserInfo);
-
-    const quizData = useQuery<{ quizById: QuizData }, { quizId: number }>(
-        getQuizById,
+    const { loading, error, data } = useQuery<
+        QueryData,
         {
-            variables: {
-                quizId: parseInt(matchData.id),
-            },
+            quizId: number;
         }
-    );
+    >(GET_QUIZ_AND_USER_DATA, {
+        variables: {
+            quizId: matchData.id,
+        },
+    });
 
     const [currentPage, setCurrentPage] = useState(0);
     const [submission, setSubmission] = useState<SubmissionInput>({
         userId: -1,
-        quizId: parseInt(matchData.id),
+        quizId: matchData.id,
         answers: [],
     });
 
     useEffect(() => {
-        if (quizData.data) {
-            let submissionInit = quizData.data.quizById.questions.map(() => -1);
+        if (data) {
+            let submissionInit = data.quizById.questions.map(() => -1);
             setSubmission((prev) => ({
                 ...prev,
+                userId: parseInt(data.myInfo.id),
                 answers: submissionInit,
             }));
         }
-    }, [quizData.data]);
-
-    useEffect(() => {
-        if (userData.data) {
-            setSubmission((prev) => ({
-                ...prev,
-                userId: parseInt(userData.data!.myInfo.id),
-            }));
-        }
-    }, [userData.data]);
+    }, [data]);
 
     const [submitSolution] = useMutation<
         { submit: { score: number } },
@@ -86,24 +108,19 @@ const StartQuiz = () => {
         },
     });
 
-    if (quizData.loading || userData.loading) return <div>Loading</div>;
+    if (loading) return <div>Loading...</div>;
 
-    if (userData.error) {
-        checkError(history, userData.error);
+    if (error) {
+        checkError(history, error);
         return <div></div>;
     }
 
-    if (quizData.error) {
-        checkError(history, quizData.error);
-        return <div></div>;
-    }
-
-    if (!quizData.data) {
+    if (!data) {
         history.push("/browse-quiz");
         return <div></div>;
     }
 
-    const { quizById } = quizData.data;
+    const { quizById } = data;
 
     const updateOption = (id: string) => {
         let tempAns = [...submission.answers];
