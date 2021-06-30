@@ -1,6 +1,6 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
-import { AUTH_KEY } from "../constants";
+import { AUTH_KEY, REFRESH_AUTH_KEY } from "../constants";
 import { onError } from "@apollo/client/link/error";
 
 const httpLink = createHttpLink({
@@ -19,11 +19,13 @@ const errorLink = onError(({ networkError, graphQLErrors }) => {
 
 const authLink = setContext((_, { headers }) => {
     const token = localStorage.getItem(AUTH_KEY);
+    const refreshToken = localStorage.getItem(REFRESH_AUTH_KEY);
 
     return {
         headers: {
             ...headers,
             authorization: token ? `Bearer ${token}` : "",
+            refreshToken: refreshToken || "",
         },
     };
 });

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
-import { AUTH_KEY } from "../../constants";
+import { AUTH_KEY, REFRESH_AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
 import { AuthResponse } from "./interfaces";
@@ -16,6 +16,7 @@ const REGISTER_USER = gql`
     mutation RegisterUser($name: String!, $email: String!, $password: String!) {
         registerUser(email: $email, password: $password, name: $name) {
             token
+            refreshToken
         }
     }
 `;
@@ -46,6 +47,7 @@ const RegisterForm: React.FC = () => {
         },
         onCompleted: ({ registerUser: { token } }) => {
             localStorage.setItem(AUTH_KEY, token);
+            localStorage.setItem(REFRESH_AUTH_KEY, token);
             console.log("Registration successful");
             history.push("/");
         },

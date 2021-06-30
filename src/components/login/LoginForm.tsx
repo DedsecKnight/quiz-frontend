@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
-import { AUTH_KEY } from "../../constants";
+import { AUTH_KEY, REFRESH_AUTH_KEY } from "../../constants";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
 import { AuthResponse } from "./interfaces";
@@ -14,6 +14,7 @@ const LOGIN_USER = gql`
     mutation LoginUser($email: String!, $password: String!) {
         login(email: $email, password: $password) {
             token
+            refreshToken
         }
     }
 `;
@@ -38,8 +39,9 @@ const LoginForm: React.FC = () => {
             email: form.email,
             password: form.password,
         },
-        onCompleted: ({ login: { token } }) => {
+        onCompleted: ({ login: { token, refreshToken } }) => {
             localStorage.setItem(AUTH_KEY, token);
+            localStorage.setItem(REFRESH_AUTH_KEY, refreshToken);
             console.log("Login successful");
             history.push("/");
         },
