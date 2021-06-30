@@ -15,16 +15,16 @@ export const checkError = (
     ) {
         localStorage.removeItem(AUTH_KEY);
         history.push("/login");
-    }
+    } else {
+        const otherError = error.graphQLErrors;
 
-    const otherError = error.graphQLErrors;
-
-    if (otherError.length !== 0) {
-        history.push({
-            pathname: "/404",
-            state: {
-                message: otherError[0].message,
-            },
-        });
+        if (otherError.length !== 0) {
+            history.push({
+                pathname: "/404",
+                state: {
+                    message: otherError[0].message,
+                },
+            });
+        }
     }
 };
