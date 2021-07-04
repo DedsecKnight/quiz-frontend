@@ -2,12 +2,14 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { checkError } from "../error/checkError";
 import Loading from "../utilities/Loading";
 import AnswerBox from "./AnswerBox";
 
 import ErrorComponent from "../error/Error";
 import NoDataFound from "../utilities/NoDataFound";
+import { BAD_USER_INPUT, UNAUTHENTICATED } from "../error/errorCode";
+import { logout } from "../utilities/logout";
+import AlertList from "../error/AlertList";
 
 interface MatchData {
     id: number;
@@ -90,6 +92,7 @@ const StartQuiz = () => {
         quizId: matchData.id,
         answers: [],
     });
+    const [errors, setErrors] = useState<string[]>([]);
 
     useEffect(() => {
         if (data) {
@@ -114,8 +117,33 @@ const StartQuiz = () => {
             history.push("/");
         },
         onError: (error) => {
-            console.log(error);
-            checkError(history, error);
+            if (error.networkError) history.push("/500");
+            error.graphQLErrors.forEach((errorObject) => {
+                if (errorObject.extensions!.code === BAD_USER_INPUT)
+                    Object.keys(
+                        errorObject.extensions!.validationErrors
+                    ).forEach((key) => {
+                        if (
+                            errorObject.extensions!.validationErrors[
+                                key
+                            ] instanceof Array
+                        ) {
+                            errorObject.extensions!.validationErrors[
+                                key
+                            ].forEach((err: string) => {
+                                setErrors((prev) => [...prev, err]);
+                            });
+                        } else
+                            setErrors((prev) => [
+                                ...prev,
+                                errorObject.extensions!.validationErrors[key],
+                            ]);
+                    });
+                else if (errorObject.extensions!.code === UNAUTHENTICATED) {
+                    logout();
+                    history.push("/login");
+                } else history.push("/500");
+            });
         },
     });
 
@@ -141,6 +169,14 @@ const StartQuiz = () => {
 
     return (
         <div className="w-full h-full p-6 flex flex-col justify-around">
+            <AlertList
+                errors={errors}
+                onCloseAlert={(idx) => {
+                    let currentErrors = [...errors];
+                    currentErrors.splice(idx, 1);
+                    setErrors(currentErrors);
+                }}
+            />
             <div className="header">
                 <h1 className="text-lg font-medium text-blue-600">
                     You are currently working on:{" "}
