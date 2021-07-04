@@ -1,9 +1,12 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { gql, useMutation } from "@apollo/client";
+import { useState } from "react";
 import { injectClass } from "../utilities/inject-class";
-import { checkError } from "../error/checkError";
 import { useHistory } from "react-router-dom";
 import { QuizForm, QuestionObj } from "./interfaces";
+import { BAD_USER_INPUT, UNAUTHENTICATED } from "../error/errorCode";
+import { logout } from "../utilities/logout";
+
+import AlertList from "../error/AlertList";
 
 const CREATE_QUIZ = gql`
     mutation CreateQuiz($quizObj: QuizArgs!) {
@@ -13,20 +16,6 @@ const CREATE_QUIZ = gql`
     }
 `;
 
-const GET_USER_ID = gql`
-    query GetUserID {
-        myInfo {
-            id
-        }
-    }
-`;
-
-interface QueryData {
-    myInfo: {
-        id: number;
-    };
-}
-
 interface MutationData {
     createQuiz: {
         id: number;
@@ -34,12 +23,12 @@ interface MutationData {
 }
 
 const CreateQuiz = () => {
-    const { loading, error, data } = useQuery<QueryData>(GET_USER_ID);
     const history = useHistory();
+
+    const [errors, setErrors] = useState<string[]>([]);
 
     const [currentPage, setCurrentPage] = useState(0);
     const [newQuiz, setNewQuiz] = useState<QuizForm>({
-        userId: 0,
         quizName: "",
         difficulty: "",
         category: "",
@@ -52,19 +41,46 @@ const CreateQuiz = () => {
             variables: {
                 quizObj: newQuiz,
             },
-            onCompleted: ({ createQuiz }) => {
-                console.log(createQuiz);
+            onCompleted: () => {
                 history.push("/browse-quiz");
             },
             onError: (error) => {
-                console.log(error);
-                checkError(history, error);
+                if (error.networkError) history.push("/500");
+                error.graphQLErrors.forEach((errorObject) => {
+                    if (errorObject.extensions!.code === BAD_USER_INPUT)
+                        Object.keys(
+                            errorObject.extensions!.validationErrors
+                        ).forEach((key) => {
+                            if (
+                                errorObject.extensions!.validationErrors[
+                                    key
+                                ] instanceof Array
+                            ) {
+                                errorObject.extensions!.validationErrors[
+                                    key
+                                ].forEach((err: string) => {
+                                    setErrors((prev) => [...prev, err]);
+                                });
+                            } else
+                                setErrors((prev) => [
+                                    ...prev,
+                                    errorObject.extensions!.validationErrors[
+                                        key
+                                    ],
+                                ]);
+                        });
+                    else if (errorObject.extensions!.code === UNAUTHENTICATED) {
+                        logout();
+                        history.push("/login");
+                    } else history.push("/500");
+                });
             },
         }
     );
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setErrors([]);
         createNewQuiz();
     };
 
@@ -136,257 +152,237 @@ const CreateQuiz = () => {
 
     const { quizName, difficulty, category } = newQuiz;
 
-    useEffect(() => {
-        if (data)
-            setNewQuiz((prev) => ({
-                ...prev,
-                userId: data.myInfo.id,
-            }));
-    }, [data]);
-
-    if (loading) return <div>Loading...</div>;
-
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
-
-    if (data)
-        return (
-            <>
-                <div
-                    className="block md:hidden cursor-pointer p-4"
-                    onClick={() => injectClass()}
+    return (
+        <>
+            <div
+                className="block md:hidden cursor-pointer p-4"
+                onClick={() => injectClass()}
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 6h16M4 12h16M4 18h16"
-                        />
-                    </svg>
-                </div>
-                <div className="my-7 flex flex-col-reverse items-center gap-y-7 lg:flex-row rounded-lg">
-                    <div className="flex flex-col justify-between w-full px-7">
-                        <div className="my-stat-header border-b-2 pb-5">
-                            <h1 className="font-bold text-center lg:text-left text-3xl text-blue-900">
-                                Create Quiz
-                            </h1>
-                            <p className="text-center lg:text-left text-indigo-400">
-                                Let's create a quiz for everyone
-                            </p>
-                        </div>
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                    />
+                </svg>
+            </div>
+            <div className="my-7 flex flex-col-reverse items-center gap-y-7 lg:flex-row rounded-lg">
+                <div className="flex flex-col justify-between w-full px-7">
+                    <div className="my-stat-header border-b-2 pb-5">
+                        <h1 className="font-bold text-center lg:text-left text-3xl text-blue-900">
+                            Create Quiz
+                        </h1>
+                        <p className="text-center lg:text-left text-indigo-400">
+                            Let's create a quiz for everyone
+                        </p>
                     </div>
                 </div>
+            </div>
 
-                {/* If page is zero, show step 1 page */}
-                <form onSubmit={(e) => submit(e)}>
-                    {currentPage === 0 ? (
-                        <div className="p-6 lg:px-10 lg:py-6 flex flex-col justify-between">
-                            <h1 className="text-xl text-blue-900 font-medium">
-                                Step 1: Let's give your quiz some basic
-                                information
-                            </h1>
-                            <div className="flex flex-col my-4">
-                                <input
-                                    type="text"
-                                    name="quizName"
-                                    placeholder="Quiz name"
-                                    className="rounded-lg my-2"
-                                    value={quizName}
-                                    onChange={(e) => updateQuizInfo(e)}
-                                />
-                                <select
-                                    name="difficulty"
-                                    value={difficulty}
-                                    className="rounded-lg my-2"
-                                    onChange={(e) => updateQuizInfo(e)}
-                                >
-                                    <option value="">
-                                        Choose a difficulty
-                                    </option>
-                                    <option value="Easy">Easy</option>
-                                    <option value="Normal">Normal</option>
-                                    <option value="Hard">Hard</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    name="category"
-                                    placeholder="Choose a category"
-                                    className="rounded-lg my-2"
-                                    value={category}
-                                    onChange={(e) => updateQuizInfo(e)}
-                                />
-                            </div>
-                            <div className="flex flex-row justify-end gap-x-3">
-                                {currentPage === newQuiz.questions.length && (
-                                    <button
-                                        type="button"
-                                        className="p-3 bg-blue-500 text-white rounded-lg"
-                                        onClick={() => addQuestion()}
-                                    >
-                                        Add new question
-                                    </button>
-                                )}
-                                {currentPage < newQuiz.questions.length && (
-                                    <button
-                                        type="button"
-                                        className="p-3 bg-purple-500 text-white rounded-lg"
-                                        onClick={() =>
-                                            setCurrentPage((prev) => prev + 1)
-                                        }
-                                    >
-                                        Next
-                                    </button>
-                                )}
-                            </div>
+            <AlertList
+                errors={errors}
+                onCloseAlert={(idx) => {
+                    let currentErrors = [...errors];
+                    currentErrors.splice(idx, 1);
+                    setErrors(currentErrors);
+                }}
+            />
+
+            {/* If page is zero, show step 1 page */}
+            <form onSubmit={(e) => submit(e)}>
+                {currentPage === 0 ? (
+                    <div className="p-6 lg:px-10 lg:py-6 flex flex-col justify-between">
+                        <h1 className="text-xl text-blue-900 font-medium">
+                            Step 1: Let's give your quiz some basic information
+                        </h1>
+                        <div className="flex flex-col my-4">
+                            <input
+                                type="text"
+                                name="quizName"
+                                placeholder="Quiz name"
+                                className="rounded-lg my-2"
+                                value={quizName}
+                                onChange={(e) => updateQuizInfo(e)}
+                            />
+                            <select
+                                name="difficulty"
+                                value={difficulty}
+                                className="rounded-lg my-2"
+                                onChange={(e) => updateQuizInfo(e)}
+                            >
+                                <option value="">Choose a difficulty</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                            <input
+                                type="text"
+                                name="category"
+                                placeholder="Choose a category"
+                                className="rounded-lg my-2"
+                                value={category}
+                                onChange={(e) => updateQuizInfo(e)}
+                            />
                         </div>
-                    ) : (
-                        <div className="p-6 lg:px-10 lg:py-6 flex flex-col justify-between">
-                            <h1 className="text-xl text-blue-900 font-medium">
-                                Step 2: Let's create some questions
-                            </h1>
-                            <h1 className="text-xl text-indigo-500 font-medium mt-6 mb-3">
-                                {`Question ${currentPage}: ${
-                                    newQuiz.questions[currentPage - 1].question
-                                }`}
-                            </h1>
-                            <div className="flex flex-col mb-4">
-                                <input
-                                    type="text"
-                                    name="question"
-                                    placeholder="Enter your question here"
-                                    className="rounded-lg my-2"
-                                    value={
-                                        newQuiz.questions[currentPage - 1]
-                                            .question
+                        <div className="flex flex-row justify-end gap-x-3">
+                            {currentPage === newQuiz.questions.length && (
+                                <button
+                                    type="button"
+                                    className="p-3 bg-blue-500 text-white rounded-lg"
+                                    onClick={() => addQuestion()}
+                                >
+                                    Add new question
+                                </button>
+                            )}
+                            {currentPage < newQuiz.questions.length && (
+                                <button
+                                    type="button"
+                                    className="p-3 bg-purple-500 text-white rounded-lg"
+                                    onClick={() =>
+                                        setCurrentPage((prev) => prev + 1)
                                     }
-                                    onChange={(e) => {
-                                        updateQuestion(e, currentPage - 1);
-                                    }}
-                                />
-                                {newQuiz.questions[currentPage - 1].answers.map(
-                                    (ansObj, idx) => (
-                                        <div key={idx} className="my-3 w-full">
+                                >
+                                    Next
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-6 lg:px-10 lg:py-6 flex flex-col justify-between">
+                        <h1 className="text-xl text-blue-900 font-medium">
+                            Step 2: Let's create some questions
+                        </h1>
+                        <h1 className="text-xl text-indigo-500 font-medium mt-6 mb-3">
+                            {`Question ${currentPage}: ${
+                                newQuiz.questions[currentPage - 1].question
+                            }`}
+                        </h1>
+                        <div className="flex flex-col mb-4">
+                            <input
+                                type="text"
+                                name="question"
+                                placeholder="Enter your question here"
+                                className="rounded-lg my-2"
+                                value={
+                                    newQuiz.questions[currentPage - 1].question
+                                }
+                                onChange={(e) => {
+                                    updateQuestion(e, currentPage - 1);
+                                }}
+                            />
+                            {newQuiz.questions[currentPage - 1].answers.map(
+                                (ansObj, idx) => (
+                                    <div key={idx} className="my-3 w-full">
+                                        <input
+                                            type="text"
+                                            name="answer"
+                                            placeholder={`Option ${idx + 1}`}
+                                            className="rounded-lg my-2 w-full"
+                                            value={ansObj.answer}
+                                            onChange={(e) => {
+                                                updateAnswer(
+                                                    e,
+                                                    currentPage - 1,
+                                                    idx
+                                                );
+                                            }}
+                                        />
+                                        <div className="flex flex-row items-center gap-x-2">
                                             <input
-                                                type="text"
-                                                name="answer"
-                                                placeholder={`Option ${
-                                                    idx + 1
-                                                }`}
-                                                className="rounded-lg my-2 w-full"
-                                                value={ansObj.answer}
-                                                onChange={(e) => {
+                                                type="checkbox"
+                                                name="isCorrect"
+                                                id="correct"
+                                                checked={ansObj.isCorrect}
+                                                onChange={(e) =>
                                                     updateAnswer(
                                                         e,
                                                         currentPage - 1,
                                                         idx
-                                                    );
-                                                }}
+                                                    )
+                                                }
                                             />
-                                            <div className="flex flex-row items-center gap-x-2">
-                                                <input
-                                                    type="checkbox"
-                                                    name="isCorrect"
-                                                    id="correct"
-                                                    checked={ansObj.isCorrect}
-                                                    onChange={(e) =>
-                                                        updateAnswer(
-                                                            e,
-                                                            currentPage - 1,
-                                                            idx
-                                                        )
-                                                    }
-                                                />
-                                                <label>Is Correct</label>
-                                            </div>
+                                            <label>Is Correct</label>
                                         </div>
-                                    )
+                                    </div>
+                                )
+                            )}
+                        </div>
+                        <div className="flex flex-row justify-between gap-x-3">
+                            {currentPage > 0 && (
+                                <button
+                                    type="button"
+                                    className="p-3 bg-gray-400 text-white rounded-lg"
+                                    onClick={() =>
+                                        setCurrentPage((prev) => prev - 1)
+                                    }
+                                >
+                                    Previous
+                                </button>
+                            )}
+                            <div className="flex flex-row gap-x-3">
+                                {currentPage === newQuiz.questions.length ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className="p-3 bg-blue-500 text-white rounded-lg"
+                                            onClick={() => addQuestion()}
+                                        >
+                                            Add new question
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="p-3 bg-red-600 text-white rounded-lg"
+                                            onClick={() =>
+                                                deleteQuestion(currentPage - 1)
+                                            }
+                                        >
+                                            Delete question
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="p-3 bg-purple-700 text-white rounded-lg"
+                                        >
+                                            Submit
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className="p-3 bg-red-600 text-white rounded-lg"
+                                            onClick={() =>
+                                                deleteQuestion(currentPage - 1)
+                                            }
+                                        >
+                                            Delete question
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="p-3 bg-purple-500 text-white rounded-lg"
+                                            onClick={() =>
+                                                setCurrentPage(
+                                                    (prev) => prev + 1
+                                                )
+                                            }
+                                        >
+                                            Next
+                                        </button>
+                                    </>
                                 )}
-                            </div>
-                            <div className="flex flex-row justify-between gap-x-3">
-                                {currentPage > 0 && (
-                                    <button
-                                        type="button"
-                                        className="p-3 bg-gray-400 text-white rounded-lg"
-                                        onClick={() =>
-                                            setCurrentPage((prev) => prev - 1)
-                                        }
-                                    >
-                                        Previous
-                                    </button>
-                                )}
-                                <div className="flex flex-row gap-x-3">
-                                    {currentPage ===
-                                    newQuiz.questions.length ? (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="p-3 bg-blue-500 text-white rounded-lg"
-                                                onClick={() => addQuestion()}
-                                            >
-                                                Add new question
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="p-3 bg-red-600 text-white rounded-lg"
-                                                onClick={() =>
-                                                    deleteQuestion(
-                                                        currentPage - 1
-                                                    )
-                                                }
-                                            >
-                                                Delete question
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="p-3 bg-purple-700 text-white rounded-lg"
-                                            >
-                                                Submit
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="p-3 bg-red-600 text-white rounded-lg"
-                                                onClick={() =>
-                                                    deleteQuestion(
-                                                        currentPage - 1
-                                                    )
-                                                }
-                                            >
-                                                Delete question
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="p-3 bg-purple-500 text-white rounded-lg"
-                                                onClick={() =>
-                                                    setCurrentPage(
-                                                        (prev) => prev + 1
-                                                    )
-                                                }
-                                            >
-                                                Next
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
                             </div>
                         </div>
-                    )}
-                </form>
-            </>
-        );
-
-    return <div>No Data Found</div>;
+                    </div>
+                )}
+            </form>
+        </>
+    );
 };
 
 export default CreateQuiz;
