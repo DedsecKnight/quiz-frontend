@@ -1,0 +1,2 @@
+export const BAD_USER_INPUT = "BAD_USER_INPUT";
+export const UNAUTHENTICATED = "UNAUTHENTICATED";
