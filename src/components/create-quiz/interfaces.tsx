@@ -9,7 +9,6 @@ export interface QuestionObj {
 }
 
 export interface QuizForm {
-    userId: number;
     quizName: string;
     difficulty: string;
     category: string;
