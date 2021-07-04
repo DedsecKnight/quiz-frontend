@@ -1,7 +1,7 @@
 import NavItem from "./NavItem";
 import { useHistory } from "react-router";
 import { injectClass } from "../utilities/inject-class";
-import { logout } from "../utilities/logout";
+import { AUTH_KEY, REFRESH_AUTH_KEY } from "../../constants";
 
 interface Props {
     active: string;
@@ -35,7 +35,9 @@ const NavBar: React.FC<Props> = ({ active }) => {
             </div>
             <div className="w-full">
                 <NavItem
-                    action={() => history.push("/")}
+                    action={() => {
+                        history.push("/");
+                    }}
                     active={active === "/"}
                     icon={
                         <svg
@@ -57,7 +59,9 @@ const NavBar: React.FC<Props> = ({ active }) => {
                 />
 
                 <NavItem
-                    action={() => history.push("/create-quiz")}
+                    action={() => {
+                        history.push("/create-quiz");
+                    }}
                     active={active === "/create-quiz"}
                     icon={
                         <svg
@@ -100,10 +104,14 @@ const NavBar: React.FC<Props> = ({ active }) => {
                         </svg>
                     }
                     title="Browse Quiz"
-                    action={() => history.push("/browse-quiz")}
+                    action={() => {
+                        history.push("/browse-quiz");
+                    }}
                 />
                 <NavItem
-                    action={() => history.push("/settings")}
+                    action={() => {
+                        history.push("/settings");
+                    }}
                     active={active === "/settings"}
                     icon={
                         <svg
@@ -150,7 +158,9 @@ const NavBar: React.FC<Props> = ({ active }) => {
                     }
                     title="Logout"
                     action={() => {
-                        logout(history);
+                        localStorage.removeItem(AUTH_KEY);
+                        localStorage.removeItem(REFRESH_AUTH_KEY);
+                        history.push("/login");
                     }}
                 />
             </div>

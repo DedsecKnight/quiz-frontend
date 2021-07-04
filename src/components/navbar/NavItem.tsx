@@ -11,7 +11,7 @@ const NavItem: React.FC<Props> = ({ icon, title, active, action }) => {
             type="button"
             className="w-full my-3 rounded-lg focus:outline-none"
             onClick={() => {
-                if (action) action();
+                action();
             }}
         >
             <div
