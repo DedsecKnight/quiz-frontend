@@ -3,11 +3,11 @@ import QuizList from "./QuizList";
 import Pagination from "./Pagination";
 import { gql, useQuery } from "@apollo/client";
 import { injectClass } from "../utilities/inject-class";
-import { useHistory } from "react-router-dom";
-import { checkError } from "../error/checkError";
+import ErrorComponent from "../error/Error";
 import { useState } from "react";
-
-export const ITEM_PER_PAGE = 5;
+import { POLL_INTERVAL, ITEM_PER_PAGE } from "../utilities/constants";
+import Loading from "../utilities/Loading";
+import NoDataFound from "../utilities/NoDataFound";
 
 const GET_QUIZ_COUNT = gql`
     query GetQuizCount {
@@ -27,20 +27,13 @@ const BrowseQuiz = () => {
     const [currentPage, setCurrentPage] = useState(0);
 
     const { loading, data, error } = useQuery<QueryData>(GET_QUIZ_COUNT, {
-        errorPolicy: "all",
-        pollInterval: 1000,
+        pollInterval: POLL_INTERVAL,
     });
-    const history = useHistory();
 
-    if (loading) return <div>Loading</div>;
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
+    if (loading) return <Loading />;
+    if (error) return <ErrorComponent error={error} />;
 
-    if (!data) {
-        return <div>Data not found</div>;
-    }
+    if (!data) return <NoDataFound />;
 
     return (
         <>
