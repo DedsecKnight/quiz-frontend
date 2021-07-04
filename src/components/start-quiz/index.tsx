@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { checkError } from "../error/checkError";
+import Loading from "../utilities/Loading";
 import AnswerBox from "./AnswerBox";
+
+import ErrorComponent from "../error/Error";
+import NoDataFound from "../utilities/NoDataFound";
 
 interface MatchData {
     id: number;
@@ -115,17 +119,9 @@ const StartQuiz = () => {
         },
     });
 
-    if (loading) return <div>Loading...</div>;
-
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
-
-    if (!data) {
-        history.push("/browse-quiz");
-        return <div></div>;
-    }
+    if (loading) return <Loading />;
+    if (error) return <ErrorComponent error={error} />;
+    if (!data) return <NoDataFound />;
 
     const { quizById } = data;
 

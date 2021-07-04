@@ -3,8 +3,10 @@ import PerformanceChart from "./PerformanceChart";
 import Profile from "./Profile";
 
 import { gql, useQuery } from "@apollo/client";
-import { useHistory } from "react-router-dom";
-import { checkError } from "../error/checkError";
+import ErrorComponent from "../error/Error";
+import { POLL_INTERVAL } from "../utilities/constants";
+import NoDataFound from "../utilities/NoDataFound";
+import Loading from "../utilities/Loading";
 
 const GET_SCORE = gql`
     query GetUserScore {
@@ -24,20 +26,12 @@ interface QueryData {
 
 const MyStats: React.FC = () => {
     const { loading, error, data } = useQuery<QueryData>(GET_SCORE, {
-        errorPolicy: "all",
+        pollInterval: POLL_INTERVAL,
     });
 
-    const history = useHistory();
-
-    if (loading) return <div>Loading</div>;
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
-
-    if (!data) {
-        return <div>No data found</div>;
-    }
+    if (loading) return <Loading />;
+    if (error) return <ErrorComponent error={error} />;
+    if (!data) return <NoDataFound />;
 
     const { myScore } = data;
 

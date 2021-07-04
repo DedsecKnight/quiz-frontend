@@ -4,6 +4,9 @@ import { injectClass } from "../utilities/inject-class";
 import { gql, useQuery } from "@apollo/client";
 import { checkError } from "../error/checkError";
 import { useHistory } from "react-router-dom";
+import Loading from "../utilities/Loading";
+import ErrorComponent from "../error/Error";
+import NoDataFound from "../utilities/NoDataFound";
 
 const GET_USER_INFO = gql`
     query GetUserInfo($recentSubmissionLimit: Float!) {
@@ -63,17 +66,9 @@ const Profile = () => {
         },
     });
 
-    if (loading) return <div>Loading</div>;
-
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
-
-    if (!data) {
-        console.log("Profile did not receive data");
-        return <div>No data found</div>;
-    }
+    if (loading) return <Loading />;
+    if (error) return <ErrorComponent error={error} />;
+    if (!data) return <NoDataFound />;
 
     const {
         countMyQuizzes,

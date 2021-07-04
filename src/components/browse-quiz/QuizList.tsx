@@ -1,9 +1,11 @@
 import DifficultyBadge from "../badges/DifficultyBadge";
 import CategoryBadge from "../badges/CategoryBadge";
 import { gql, useQuery } from "@apollo/client";
-import { Link, useHistory } from "react-router-dom";
-import { checkError } from "../error/checkError";
-import { ITEM_PER_PAGE } from ".";
+import { Link } from "react-router-dom";
+import ErrorComponent from "../error/Error";
+import { ITEM_PER_PAGE } from "../utilities/constants";
+import Loading from "../utilities/Loading";
+import NoDataFound from "../utilities/NoDataFound";
 
 const GET_QUIZ = gql`
     query GetQuizByPage($limit: Float!, $offset: Float!) {
@@ -56,16 +58,11 @@ const QuizList: React.FC<Props> = ({ currentPage }) => {
             offset: currentPage * ITEM_PER_PAGE,
         },
     });
-    const history = useHistory();
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Loading />;
+    if (error) return <ErrorComponent error={error} />;
 
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
-
-    if (!data) return <div>No Data Found</div>;
+    if (!data) return <NoDataFound />;
 
     const { quizzesLimit } = data;
 

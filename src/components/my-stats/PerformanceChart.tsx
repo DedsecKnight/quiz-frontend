@@ -1,7 +1,11 @@
 import { gql, useQuery } from "@apollo/client";
 import { Bar } from "react-chartjs-2";
 import { useHistory } from "react-router-dom";
-import { checkError } from "../error/checkError";
+import { POLL_INTERVAL } from "../utilities/constants";
+
+import Loading from "../utilities/Loading";
+import NoDataFound from "../utilities/NoDataFound";
+import ErrorComponent from "../error/Error";
 
 const GET_RECENT_SUBMISSSION = gql`
     query GetRecentSubmission($limit: Float!) {
@@ -34,23 +38,12 @@ const PerformanceChart = () => {
         variables: {
             limit: 6,
         },
+        pollInterval: POLL_INTERVAL,
     });
 
-    if (loading) return <div>Loading user data...</div>;
-
-    if (error) {
-        checkError(history, error);
-        return <div></div>;
-    }
-
-    if (!data) {
-        return (
-            <div>
-                Oops, we cannot fetch any data at the moment. Please try again
-                later
-            </div>
-        );
-    }
+    if (loading) return <Loading />;
+    if (error) return <ErrorComponent error={error} />;
+    if (!data) return <NoDataFound />;
 
     const { myRecentSubmissionsLimit } = data;
 
