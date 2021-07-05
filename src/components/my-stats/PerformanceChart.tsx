@@ -1,6 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
 import { Bar } from "react-chartjs-2";
-import { useHistory } from "react-router-dom";
 import { POLL_INTERVAL } from "../utilities/constants";
 
 import Loading from "../utilities/Loading";
@@ -28,7 +27,6 @@ interface QueryData {
 }
 
 const PerformanceChart = () => {
-    const history = useHistory();
     const { loading, error, data } = useQuery<
         QueryData,
         {

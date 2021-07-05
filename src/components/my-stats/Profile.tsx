@@ -2,11 +2,10 @@ import StatCard from "./StatCard";
 import QuizCard from "./QuizCard";
 import { injectClass } from "../utilities/inject-class";
 import { gql, useQuery } from "@apollo/client";
-import { checkError } from "../error/checkError";
-import { useHistory } from "react-router-dom";
 import Loading from "../utilities/Loading";
 import ErrorComponent from "../error/Error";
 import NoDataFound from "../utilities/NoDataFound";
+import { POLL_INTERVAL } from "../utilities/constants";
 
 const GET_USER_INFO = gql`
     query GetUserInfo($recentSubmissionLimit: Float!) {
@@ -53,8 +52,6 @@ interface QueryData {
 }
 
 const Profile = () => {
-    const history = useHistory();
-
     const { loading, data, error } = useQuery<
         QueryData,
         {
@@ -64,6 +61,7 @@ const Profile = () => {
         variables: {
             recentSubmissionLimit: 3,
         },
+        pollInterval: POLL_INTERVAL,
     });
 
     if (loading) return <Loading />;
