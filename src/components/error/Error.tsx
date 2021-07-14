@@ -8,12 +8,13 @@ interface Props {
 
 const ErrorComponent: React.FC<Props> = ({ error }) => {
     if (error.networkError) return <Redirect to="/500" />;
-    else if (
+    if (
         error.graphQLErrors.filter(
             (errorObject) => errorObject.extensions!.code === "UNAUTHENTICATED"
         ).length > 0
     ) {
-        return logout();
+        logout();
+        return <Redirect to="/login" />;
     } else console.log(error.graphQLErrors);
 
     return <div></div>;
