@@ -2,6 +2,7 @@ import NavItem from "./NavItem";
 import { useHistory } from "react-router";
 import { injectClass } from "../utilities/inject-class";
 import { AUTH_KEY, REFRESH_AUTH_KEY } from "../../constants";
+import { client } from "../../graphql/client";
 
 interface Props {
     active: string;
@@ -158,9 +159,17 @@ const NavBar: React.FC<Props> = ({ active }) => {
                     }
                     title="Logout"
                     action={() => {
-                        localStorage.removeItem(AUTH_KEY);
-                        localStorage.removeItem(REFRESH_AUTH_KEY);
-                        history.push("/login");
+                        client
+                            .resetStore()
+                            .then(() => {
+                                localStorage.removeItem(AUTH_KEY);
+                                localStorage.removeItem(REFRESH_AUTH_KEY);
+                                history.push("/login");
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                history.push("/500");
+                            });
                     }}
                 />
             </div>
