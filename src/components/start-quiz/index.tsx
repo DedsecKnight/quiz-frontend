@@ -16,12 +16,11 @@ interface MatchData {
 }
 
 interface SubmissionInput {
-    userId: number;
     quizId: number;
     answers: number[];
 }
 
-const GET_QUIZ_AND_USER_DATA = gql`
+const GET_QUIZ_DATA = gql`
     query GetQuizUserData($quizId: Float!) {
         quizById(id: $quizId) {
             quizName
@@ -32,9 +31,6 @@ const GET_QUIZ_AND_USER_DATA = gql`
                     answer
                 }
             }
-        }
-        myInfo {
-            id
         }
     }
 `;
@@ -58,9 +54,6 @@ interface QueryData {
             }>;
         }>;
     };
-    myInfo: {
-        id: string;
-    };
 }
 
 const StartQuiz = () => {
@@ -80,7 +73,7 @@ const StartQuiz = () => {
         {
             quizId: number;
         }
-    >(GET_QUIZ_AND_USER_DATA, {
+    >(GET_QUIZ_DATA, {
         variables: {
             quizId: matchData.id,
         },
@@ -88,7 +81,6 @@ const StartQuiz = () => {
 
     const [currentPage, setCurrentPage] = useState(0);
     const [submission, setSubmission] = useState<SubmissionInput>({
-        userId: -1,
         quizId: matchData.id,
         answers: [],
     });
@@ -99,7 +91,6 @@ const StartQuiz = () => {
             let submissionInit = data.quizById.questions.map(() => -1);
             setSubmission((prev) => ({
                 ...prev,
-                userId: parseInt(data.myInfo.id),
                 answers: submissionInit,
             }));
         }
