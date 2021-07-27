@@ -4,31 +4,50 @@ import Pagination from "./Pagination";
 import { gql, useQuery } from "@apollo/client";
 import { injectClass } from "../utilities/inject-class";
 import ErrorComponent from "../error/Error";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { POLL_INTERVAL, ITEM_PER_PAGE } from "../utilities/constants";
 import Loading from "../utilities/Loading";
 import NoDataFound from "../utilities/NoDataFound";
 
 const GET_QUIZ_COUNT = gql`
-    query GetQuizCount {
-        countAllQuizzes {
+    query GetQuizCount($query: String!) {
+        countQuizzes(query: $query) {
             count
         }
     }
 `;
 
 interface QueryData {
-    countAllQuizzes: {
+    countQuizzes: {
         count: number;
     };
 }
 
 const BrowseQuiz = () => {
     const [currentPage, setCurrentPage] = useState(0);
+    const [queryParam, setQueryParam] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
-    const { loading, data, error } = useQuery<QueryData>(GET_QUIZ_COUNT, {
+    const { loading, data, error } = useQuery<
+        QueryData,
+        {
+            query: string;
+        }
+    >(GET_QUIZ_COUNT, {
         pollInterval: POLL_INTERVAL,
+        variables: {
+            query: queryParam,
+        },
     });
+
+    useEffect(() => {
+        let timer = setTimeout(() => {
+            setQueryParam(searchQuery);
+        }, 1000);
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [searchQuery]);
 
     if (loading) return <Loading />;
     if (error) return <ErrorComponent error={error} />;
@@ -66,17 +85,31 @@ const BrowseQuiz = () => {
                             Let's solve some quizzes
                         </p>
                     </div>
-                    <SearchBox />
-                    <QuizList currentPage={currentPage} />
-                    <Pagination
-                        numPages={Math.ceil(
-                            data.countAllQuizzes.count / ITEM_PER_PAGE
-                        )}
-                        currentPage={currentPage}
-                        updatePage={(pageNumber) => {
-                            setCurrentPage(pageNumber);
+                    <SearchBox
+                        searchQuery={searchQuery}
+                        setQuery={(e) => {
+                            setSearchQuery(e.target.value);
                         }}
                     />
+                    {data.countQuizzes.count > 0 ? (
+                        <>
+                            <QuizList
+                                currentPage={currentPage}
+                                searchQuery={queryParam}
+                            />
+                            <Pagination
+                                numPages={Math.ceil(
+                                    data.countQuizzes.count / ITEM_PER_PAGE
+                                )}
+                                currentPage={currentPage}
+                                updatePage={(pageNumber) => {
+                                    setCurrentPage(pageNumber);
+                                }}
+                            />
+                        </>
+                    ) : (
+                        <h1>No quizzes found</h1>
+                    )}
                 </div>
             </div>
         </>

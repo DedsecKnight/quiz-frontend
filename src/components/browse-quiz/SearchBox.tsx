@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 
-const SearchBox = () => {
+interface Props {
+    searchQuery: string;
+    setQuery: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const SearchBox: React.FC<Props> = ({ searchQuery, setQuery }) => {
     useEffect(() => {
         document
             .querySelector(".search-input")
@@ -44,6 +49,10 @@ const SearchBox = () => {
                 type="text"
                 className="search-input flex-grow focus:ring-0 border-0"
                 placeholder="Search for a quiz"
+                value={searchQuery}
+                onChange={(e) => {
+                    setQuery(e);
+                }}
             />
         </div>
     );

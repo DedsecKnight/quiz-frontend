@@ -8,8 +8,8 @@ import Loading from "../utilities/Loading";
 import NoDataFound from "../utilities/NoDataFound";
 
 const GET_QUIZ = gql`
-    query GetQuizByPage($limit: Float!, $offset: Float!) {
-        quizzesLimit(limit: $limit, offset: $offset) {
+    query GetQuizByPage($limit: Float!, $offset: Float!, $query: String!) {
+        quizzes(limit: $limit, offset: $offset, query: $query) {
             id
             quizName
             author {
@@ -26,7 +26,7 @@ const GET_QUIZ = gql`
 `;
 
 interface QueryData {
-    quizzesLimit: Array<{
+    quizzes: Array<{
         id: number;
         quizName: string;
         author: {
@@ -43,19 +43,22 @@ interface QueryData {
 
 interface Props {
     currentPage: number;
+    searchQuery: string;
 }
 
-const QuizList: React.FC<Props> = ({ currentPage }) => {
+const QuizList: React.FC<Props> = ({ currentPage, searchQuery }) => {
     const { loading, error, data } = useQuery<
         QueryData,
         {
             limit: number;
             offset: number;
+            query: string;
         }
     >(GET_QUIZ, {
         variables: {
             limit: ITEM_PER_PAGE,
             offset: currentPage * ITEM_PER_PAGE,
+            query: searchQuery,
         },
     });
 
@@ -64,11 +67,11 @@ const QuizList: React.FC<Props> = ({ currentPage }) => {
 
     if (!data) return <NoDataFound />;
 
-    const { quizzesLimit } = data;
+    const { quizzes } = data;
 
     return (
         <div className="my-6">
-            {quizzesLimit.map((quiz, idx: number) => (
+            {quizzes.map((quiz, idx: number) => (
                 <div
                     key={idx}
                     className="flex flex-row items-center justify-between p-4 my-2 border-2 border-gray-200 rounded-lg"
