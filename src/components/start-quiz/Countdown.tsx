@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { useRouteMatch } from "react-router-dom";
+import Hamburger from "../utilities/Hamburger";
 
 interface MatchData {
     id: string;
@@ -32,7 +33,8 @@ const Countdown: React.FC = () => {
 
     return (
         <div className="w-full h-full relative">
-            <div className="absolute container mx-auto top-1/4">
+            <Hamburger />
+            <div className="absolute container mx-auto top-1/2 lg:top-1/4">
                 <h1 className="text-2xl text-center">Quiz is starting in</h1>
                 <h1 className="text-2xl text-center text-blue-600">
                     {seconds} seconds

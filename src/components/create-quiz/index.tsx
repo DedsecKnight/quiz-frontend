@@ -1,12 +1,12 @@
 import { gql, useMutation } from "@apollo/client";
 import { useState } from "react";
-import { injectClass } from "../utilities/inject-class";
 import { useHistory } from "react-router-dom";
 import { QuizForm, QuestionObj } from "./interfaces";
 import { BAD_USER_INPUT, UNAUTHENTICATED } from "../error/errorCode";
 import { logout } from "../utilities/logout";
 
 import AlertList from "../error/AlertList";
+import Hamburger from "../utilities/Hamburger";
 
 const CREATE_QUIZ = gql`
     mutation CreateQuiz($quizObj: QuizArgs!) {
@@ -154,25 +154,7 @@ const CreateQuiz = () => {
 
     return (
         <>
-            <div
-                className="block md:hidden cursor-pointer p-4"
-                onClick={() => injectClass()}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                </svg>
-            </div>
+            <Hamburger />
             <div className="my-7 flex flex-col-reverse items-center gap-y-7 lg:flex-row rounded-lg">
                 <div className="flex flex-col justify-between w-full px-7">
                     <div className="my-stat-header border-b-2 pb-5">

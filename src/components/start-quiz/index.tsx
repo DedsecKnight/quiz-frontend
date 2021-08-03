@@ -10,6 +10,7 @@ import NoDataFound from "../utilities/NoDataFound";
 import { BAD_USER_INPUT, UNAUTHENTICATED } from "../error/errorCode";
 import { logout } from "../utilities/logout";
 import AlertList from "../error/AlertList";
+import Hamburger from "../utilities/Hamburger";
 
 interface MatchData {
     id: number;
@@ -160,7 +161,8 @@ const StartQuiz = () => {
     };
 
     return (
-        <div className="w-full h-full p-6 flex flex-col justify-around">
+        <div className="w-full h-full p-6 flex flex-col justify-around gap-y-6 ">
+            <Hamburger />
             <AlertList
                 errors={errors}
                 onCloseAlert={(idx) => {

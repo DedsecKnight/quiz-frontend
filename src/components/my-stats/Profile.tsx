@@ -1,11 +1,11 @@
 import StatCard from "./StatCard";
 import QuizCard from "./QuizCard";
-import { injectClass } from "../utilities/inject-class";
 import { gql, useQuery } from "@apollo/client";
 import Loading from "../utilities/Loading";
 import ErrorComponent from "../error/Error";
 import NoDataFound from "../utilities/NoDataFound";
 import { POLL_INTERVAL } from "../utilities/constants";
+import Hamburger from "../utilities/Hamburger";
 
 const GET_USER_INFO = gql`
     query GetUserInfo($recentSubmissionLimit: Float!) {
@@ -77,25 +77,7 @@ const Profile = () => {
 
     return (
         <div className="flex flex-col justify-between mb-6 md:mb-0">
-            <div
-                className="block md:hidden cursor-pointer"
-                onClick={() => injectClass()}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                </svg>
-            </div>
+            <Hamburger />
             <div className="w-1/2 h-1/2 mx-auto">
                 <div className="profile-pic">
                     <img
