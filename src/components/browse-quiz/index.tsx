@@ -108,7 +108,11 @@ const BrowseQuiz = () => {
                             />
                         </>
                     ) : (
-                        <h1>No quizzes found</h1>
+                        <div className="w-full p-6">
+                            <h1 className="text-center text-xl text-medium">
+                                No quizzes found
+                            </h1>
+                        </div>
                     )}
                 </div>
             </div>
