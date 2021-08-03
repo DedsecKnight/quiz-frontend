@@ -13,6 +13,7 @@ import StartQuiz from "./components/start-quiz";
 import Error500 from "./components/error/Error500";
 import Error404 from "./components/error/Error404";
 import ScoreReport from "./components/score-report";
+import MySubmissions from "./components/my-submissions";
 
 const App: React.FC = () => {
     return (
@@ -81,6 +82,16 @@ const App: React.FC = () => {
                 component={() => (
                     <MainView link="/score-report">
                         <ScoreReport />
+                    </MainView>
+                )}
+            />
+
+            <PrivateRoute
+                exact
+                path="/my-submissions"
+                component={() => (
+                    <MainView link="/my-submissions">
+                        <MySubmissions />
                     </MainView>
                 )}
             />
