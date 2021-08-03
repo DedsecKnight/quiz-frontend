@@ -6,6 +6,7 @@ import ErrorComponent from "../error/Error";
 import NoDataFound from "../utilities/NoDataFound";
 import { POLL_INTERVAL } from "../utilities/constants";
 import Hamburger from "../utilities/Hamburger";
+import { Link } from "react-router-dom";
 
 const GET_USER_INFO = gql`
     query GetUserInfo($recentSubmissionLimit: Float!) {
@@ -140,9 +141,12 @@ const Profile = () => {
             <div className="flex flex-col mt-6 gap-y-4">
                 <div className="flex flex-row justify-between w-full lg:w-4/5 mx-auto pt-3">
                     <p className="text-blue-900">Recent Quizzes</p>
-                    <p className="text-right xl:text-left text-indigo-400 cursor-pointer hover:text-indigo-600">
+                    <Link
+                        to="/my-submissions"
+                        className="text-right xl:text-left text-indigo-400 cursor-pointer hover:text-indigo-600"
+                    >
                         View all my taken quizzes
-                    </p>
+                    </Link>
                 </div>
                 {myRecentSubmissionsLimit.length > 0 ? (
                     myRecentSubmissionsLimit.map((obj, idx: number) => (
