@@ -16,7 +16,7 @@ const AnswerList: React.FC<Props> = ({ questions, answers }) => {
         <div className="m-6">
             {questions.map((question, idx) => (
                 <div
-                    className="border-2 rounded-xl p-6 flex flex-col justify-between gap-y-5"
+                    className="border-2 rounded-xl p-6 flex flex-col justify-between gap-y-5 my-5"
                     key={idx}
                 >
                     <h1 className="text-xl text-blue-900 text-medium">
