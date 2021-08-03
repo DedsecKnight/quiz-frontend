@@ -38,6 +38,7 @@ const GET_QUIZ_DATA = gql`
 const SUBMIT_SOLUTION = gql`
     mutation SubmitSolution($submitInput: SubmitInput!) {
         submit(submitInput: $submitInput) {
+            id
             score
         }
     }
@@ -97,7 +98,7 @@ const StartQuiz = () => {
     }, [data]);
 
     const [submitSolution] = useMutation<
-        { submit: { score: number } },
+        { submit: { score: number; id: number } },
         { submitInput: SubmissionInput }
     >(SUBMIT_SOLUTION, {
         variables: {
@@ -105,7 +106,7 @@ const StartQuiz = () => {
         },
         onCompleted: (data) => {
             console.log(data);
-            history.push("/");
+            history.push(`/score-report/${data.submit.id}`);
         },
         onError: (error) => {
             if (error.networkError) history.push("/500");
