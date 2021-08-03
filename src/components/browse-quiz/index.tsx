@@ -2,12 +2,12 @@ import SearchBox from "./SearchBox";
 import QuizList from "./QuizList";
 import Pagination from "./Pagination";
 import { gql, useQuery } from "@apollo/client";
-import { injectClass } from "../utilities/inject-class";
 import ErrorComponent from "../error/Error";
 import { useEffect, useState } from "react";
 import { POLL_INTERVAL, ITEM_PER_PAGE } from "../utilities/constants";
 import Loading from "../utilities/Loading";
 import NoDataFound from "../utilities/NoDataFound";
+import Hamburger from "../utilities/Hamburger";
 
 const GET_QUIZ_COUNT = gql`
     query GetQuizCount($query: String!) {
@@ -56,25 +56,7 @@ const BrowseQuiz = () => {
 
     return (
         <>
-            <div
-                className="block md:hidden cursor-pointer p-4"
-                onClick={() => injectClass()}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 6h16M4 12h16M4 18h16"
-                    />
-                </svg>
-            </div>
+            <Hamburger />
             <div className="my-7 flex flex-col-reverse items-center gap-y-7 lg:flex-row rounded-lg">
                 <div className="flex flex-col justify-between w-full px-7">
                     <div className="my-stat-header border-b-2 pb-5">
@@ -108,7 +90,11 @@ const BrowseQuiz = () => {
                             />
                         </>
                     ) : (
-                        <h1>No quizzes found</h1>
+                        <div className="w-full p-6">
+                            <h1 className="text-center text-xl text-medium">
+                                No quizzes found
+                            </h1>
+                        </div>
                     )}
                 </div>
             </div>

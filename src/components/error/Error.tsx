@@ -15,7 +15,14 @@ const ErrorComponent: React.FC<Props> = ({ error }) => {
     ) {
         logout();
         return <Redirect to="/login" />;
-    } else console.log(error.graphQLErrors);
+    } else if (
+        error.graphQLErrors.filter(
+            (errorObject) =>
+                errorObject.extensions!.code === "RESOURCE_NOT_FOUND"
+        ).length > 0
+    )
+        return <div>Oops, what you seems to be looking for does not exist</div>;
+    console.log(error.graphQLErrors);
 
     return <div></div>;
 };

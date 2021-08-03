@@ -10,6 +10,7 @@ import NoDataFound from "../utilities/NoDataFound";
 import { BAD_USER_INPUT, UNAUTHENTICATED } from "../error/errorCode";
 import { logout } from "../utilities/logout";
 import AlertList from "../error/AlertList";
+import Hamburger from "../utilities/Hamburger";
 
 interface MatchData {
     id: number;
@@ -38,6 +39,7 @@ const GET_QUIZ_DATA = gql`
 const SUBMIT_SOLUTION = gql`
     mutation SubmitSolution($submitInput: SubmitInput!) {
         submit(submitInput: $submitInput) {
+            id
             score
         }
     }
@@ -97,7 +99,7 @@ const StartQuiz = () => {
     }, [data]);
 
     const [submitSolution] = useMutation<
-        { submit: { score: number } },
+        { submit: { score: number; id: number } },
         { submitInput: SubmissionInput }
     >(SUBMIT_SOLUTION, {
         variables: {
@@ -105,7 +107,7 @@ const StartQuiz = () => {
         },
         onCompleted: (data) => {
             console.log(data);
-            history.push("/");
+            history.push(`/score-report/${data.submit.id}`);
         },
         onError: (error) => {
             if (error.networkError) history.push("/500");
@@ -159,7 +161,8 @@ const StartQuiz = () => {
     };
 
     return (
-        <div className="w-full h-full p-6 flex flex-col justify-around">
+        <div className="w-full h-full p-6 flex flex-col justify-around gap-y-6 ">
+            <Hamburger />
             <AlertList
                 errors={errors}
                 onCloseAlert={(idx) => {
