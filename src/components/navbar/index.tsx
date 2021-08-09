@@ -186,7 +186,7 @@ const NavBar: React.FC<Props> = ({ active }) => {
                     title="Logout"
                     action={() => {
                         client
-                            .resetStore()
+                            .clearStore()
                             .then(() => {
                                 localStorage.removeItem(AUTH_KEY);
                                 localStorage.removeItem(REFRESH_AUTH_KEY);

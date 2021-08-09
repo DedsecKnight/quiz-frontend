@@ -1,5 +1,5 @@
 import { ApolloError } from "@apollo/client";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import { logout } from "../utilities/logout";
 import { FORBIDDEN, RESOURCE_NOT_FOUND } from "./errorCode";
 
@@ -8,14 +8,16 @@ interface Props {
 }
 
 const ErrorComponent: React.FC<Props> = ({ error }) => {
+    const history = useHistory();
     if (error.networkError) return <Redirect to="/500" />;
     if (
         error.graphQLErrors.filter(
             (errorObject) => errorObject.extensions!.code === "UNAUTHENTICATED"
         ).length > 0
     ) {
-        logout();
-        return <Redirect to="/login" />;
+        logout().then(() => {
+            history.push("/login");
+        });
     } else if (
         error.graphQLErrors.filter(
             (errorObject) => errorObject.extensions!.code === RESOURCE_NOT_FOUND
