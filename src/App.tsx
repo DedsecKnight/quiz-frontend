@@ -15,6 +15,7 @@ import Error404 from "./components/error/Error404";
 import ScoreReport from "./components/score-report";
 import MySubmissions from "./components/my-submissions";
 import MyQuizzes from "./components/my-quizzes";
+import EditQuiz from "./components/edit-quiz";
 
 const App: React.FC = () => {
     return (
@@ -103,6 +104,16 @@ const App: React.FC = () => {
                 component={() => (
                     <MainView link="/my-quizzes">
                         <MyQuizzes />
+                    </MainView>
+                )}
+            />
+
+            <PrivateRoute
+                exact
+                path="/edit-quiz/:id"
+                component={() => (
+                    <MainView link="/edit-quiz">
+                        <EditQuiz />
                     </MainView>
                 )}
             />
