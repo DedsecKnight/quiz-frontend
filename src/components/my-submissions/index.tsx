@@ -62,7 +62,7 @@ const MySubmissions = () => {
                     ) : (
                         <div className="w-full p-6">
                             <h1 className="text-center text-xl text-medium">
-                                No quizzes found
+                                No submissions found
                             </h1>
                         </div>
                     )}
