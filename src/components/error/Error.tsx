@@ -3,7 +3,8 @@ import { Redirect, useHistory } from "react-router-dom";
 import { logout } from "../utilities/logout";
 import Error401 from "./Error401";
 import Error404 from "./Error404";
-import { FORBIDDEN, RESOURCE_NOT_FOUND } from "./errorCode";
+import { FORBIDDEN, RESOURCE_NOT_FOUND, UNAUTHENTICATED } from "./errorCode";
+import UnknownError from "./UnknownError";
 
 interface Props {
     error: ApolloError;
@@ -14,7 +15,7 @@ const ErrorComponent: React.FC<Props> = ({ error }) => {
     if (error.networkError) return <Redirect to="/500" />;
     if (
         error.graphQLErrors.filter(
-            (errorObject) => errorObject.extensions!.code === "UNAUTHENTICATED"
+            (errorObject) => errorObject.extensions!.code === UNAUTHENTICATED
         ).length > 0
     ) {
         logout().then(() => {
@@ -36,9 +37,8 @@ const ErrorComponent: React.FC<Props> = ({ error }) => {
         return (
             <Error401 message="Oops, you are not allowed to access this information" />
         );
-    console.log(error.graphQLErrors);
 
-    return <div></div>;
+    return <UnknownError error={error} />;
 };
 
 export default ErrorComponent;
