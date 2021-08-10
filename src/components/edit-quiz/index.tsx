@@ -167,7 +167,6 @@ const EditQuiz = () => {
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setErrors([]);
-        console.log(quiz);
         updateQuiz();
     };
 

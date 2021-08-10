@@ -106,7 +106,6 @@ const StartQuiz = () => {
             submitInput: submission,
         },
         onCompleted: (data) => {
-            console.log(data);
             history.push(`/score-report/${data.submit.id}`);
         },
         onError: (error) => {
@@ -156,7 +155,6 @@ const StartQuiz = () => {
     };
 
     const submit = () => {
-        console.log(submission);
         submitSolution();
     };
 

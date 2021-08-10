@@ -7,15 +7,15 @@ const httpLink = createHttpLink({
     uri: "http://localhost:5000",
 });
 
-const errorLink = onError(({ networkError, graphQLErrors }) => {
-    console.log("Error occurred");
-    if (graphQLErrors) {
-        graphQLErrors.forEach((err) => {
-            console.log(err);
-        });
-    }
-    if (networkError) console.log(networkError);
-});
+// const errorLink = onError(({ networkError, graphQLErrors }) => {
+//     console.log("Error occurred");
+//     if (graphQLErrors) {
+//         graphQLErrors.forEach((err) => {
+//             console.log(err);
+//         });
+//     }
+//     if (networkError) console.log(networkError);
+// });
 
 const authLink = setContext((_, { headers }) => {
     const token = localStorage.getItem(AUTH_KEY);
@@ -31,6 +31,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 export const client = new ApolloClient({
-    link: authLink.concat(errorLink).concat(httpLink),
+    // link: authLink.concat(errorLink).concat(httpLink),
+    link: authLink.concat(httpLink),
     cache: new InMemoryCache(),
 });

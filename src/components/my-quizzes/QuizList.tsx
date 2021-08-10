@@ -143,7 +143,6 @@ const QuizList: React.FC<Props> = ({ currentPage }) => {
                                     setShowDeleteModal(showModal);
                                 }}
                                 modalAction={() => {
-                                    // console.log(modalIndex);
                                     deleteQuiz();
                                 }}
                                 message={

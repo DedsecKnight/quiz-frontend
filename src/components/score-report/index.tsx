@@ -101,8 +101,6 @@ const ScoreReport = () => {
         (answer) => answer.isCorrect
     ).length;
 
-    console.log(submissionById);
-
     return (
         <>
             <Hamburger />
