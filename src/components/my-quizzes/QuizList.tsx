@@ -1,11 +1,13 @@
 import DifficultyBadge from "../badges/DifficultyBadge";
 import CategoryBadge from "../badges/CategoryBadge";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
 import ErrorComponent from "../error/Error";
 import { ITEM_PER_PAGE } from "../utilities/constants";
 import Loading from "../utilities/Loading";
 import NoDataFound from "../utilities/NoDataFound";
+import { useState } from "react";
+import Modal from "./Modal";
 
 const GET_QUIZZES = gql`
     query GetQuizzesByPage($limit: Float!, $offset: Float!) {
@@ -22,9 +24,18 @@ const GET_QUIZZES = gql`
     }
 `;
 
+const DELETE_QUIZ = gql`
+    mutation DeleteQuiz($quizId: Float!) {
+        removeQuiz(quizId: $quizId) {
+            statusCode
+            message
+        }
+    }
+`;
+
 interface QueryData {
     myQuizzes: Array<{
-        id: number;
+        id: string;
         quizName: string;
         difficulty: {
             type: string;
@@ -50,6 +61,28 @@ const QuizList: React.FC<Props> = ({ currentPage }) => {
         variables: {
             limit: ITEM_PER_PAGE,
             offset: currentPage * ITEM_PER_PAGE,
+        },
+    });
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [modalIndex, setModalIndex] = useState(-1);
+
+    const [deleteQuiz] = useMutation<
+        {
+            removeQuiz: {
+                statusCode: number;
+                message: string;
+            };
+        },
+        {
+            quizId: number;
+        }
+    >(DELETE_QUIZ, {
+        variables: {
+            quizId: modalIndex,
+        },
+        onCompleted: () => {
+            setShowDeleteModal(false);
         },
     });
 
@@ -95,9 +128,30 @@ const QuizList: React.FC<Props> = ({ currentPage }) => {
                         >
                             Edit
                         </Link>
-                        <button className="border-red-600 border py-2 px-4 rounded-xl text-red-600 hover:bg-red-400 hover:text-white hover:border-0 transition ease-in-out duration-300">
+                        <button
+                            onClick={() => {
+                                setModalIndex(parseInt(quiz.id));
+                                setShowDeleteModal((prev) => !prev);
+                            }}
+                            className="border-red-600 border py-2 px-4 rounded-xl text-red-600 hover:bg-red-400 hover:text-white hover:border-0 transition ease-in-out duration-300"
+                        >
                             Delete
                         </button>
+                        {showDeleteModal && (
+                            <Modal
+                                setShowModal={(showModal) => {
+                                    setShowDeleteModal(showModal);
+                                }}
+                                modalAction={() => {
+                                    // console.log(modalIndex);
+                                    deleteQuiz();
+                                }}
+                                message={
+                                    "Are you sure you want to delete this quiz?"
+                                }
+                                modalTitle="Delete Quiz"
+                            />
+                        )}
                     </div>
                 </div>
             ))}
