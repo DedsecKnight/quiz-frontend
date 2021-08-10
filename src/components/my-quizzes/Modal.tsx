@@ -1,3 +1,5 @@
+// Modal implementation taken from https://www.creative-tim.com/learning-lab/tailwind-starter-kit/documentation/react/modals/regular
+
 interface Props {
     setShowModal: (showModal: boolean) => void;
     modalAction: () => void;
