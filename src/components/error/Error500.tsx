@@ -8,9 +8,16 @@ const Error500 = () => {
     }, []);
 
     return (
-        <div>
-            Oops, our server is currently down at the moment. Please try again
-            later
+        <div className="w-full p-10">
+            <div className="container mx-auto flex flex-col gap-y-3 p-4">
+                <h1 className="text-center text-regular text-blue-900 text-3xl">
+                    500 - Server Error
+                </h1>
+                <h1 className="text-center">
+                    Oops, our server is currently down at the moment. Please try
+                    again later
+                </h1>
+            </div>
         </div>
     );
 };

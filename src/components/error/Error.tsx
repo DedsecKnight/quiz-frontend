@@ -1,6 +1,8 @@
 import { ApolloError } from "@apollo/client";
 import { Redirect, useHistory } from "react-router-dom";
 import { logout } from "../utilities/logout";
+import Error401 from "./Error401";
+import Error404 from "./Error404";
 import { FORBIDDEN, RESOURCE_NOT_FOUND } from "./errorCode";
 
 interface Props {
@@ -23,13 +25,17 @@ const ErrorComponent: React.FC<Props> = ({ error }) => {
             (errorObject) => errorObject.extensions!.code === RESOURCE_NOT_FOUND
         ).length > 0
     )
-        return <div>Oops, what you seems to be looking for does not exist</div>;
+        return (
+            <Error404 message="Oops, what you seems to be looking for does not exist" />
+        );
     else if (
         error.graphQLErrors.filter(
             (errorObject) => errorObject.extensions!.code === FORBIDDEN
         ).length > 0
     )
-        return <div>Oops, you are not allowed to access this information</div>;
+        return (
+            <Error401 message="Oops, you are not allowed to access this information" />
+        );
     console.log(error.graphQLErrors);
 
     return <div></div>;
