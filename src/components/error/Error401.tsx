@@ -4,12 +4,12 @@ interface Props {
     message: string;
 }
 
-const Error404: React.FC<Props> = ({ message }) => {
+const Error401: React.FC<Props> = ({ message }) => {
     return (
         <div className="w-full p-10">
             <div className="container mx-auto flex flex-col gap-y-3 p-4">
                 <h1 className="text-center text-regular text-blue-900 text-3xl">
-                    404 Not Found
+                    401 - Unauthorized
                 </h1>
                 <h1 className="text-center">{message}</h1>
                 <Link
@@ -23,4 +23,4 @@ const Error404: React.FC<Props> = ({ message }) => {
     );
 };
 
-export default Error404;
+export default Error401;
